@@ -4,6 +4,7 @@ import { Heart, Menu, Search, ShoppingBag, User } from "lucide-react-native";
 import { useState } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
+import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
 import MobileDrawer from "./mobile-drawer";
@@ -14,6 +15,7 @@ export default function HeaderBar() {
   
   const cartTotal = useCartStore((s) => s.totalItems);
   const wishlistCount = useWishlistStore((s) => s.count);
+  const user = useAuthStore((s) => s.user);
 
   return (
     <>
@@ -38,7 +40,7 @@ export default function HeaderBar() {
           </View>
 
           <View style={styles.rightGroup}>
-            <Pressable onPress={() => router.push("/explore")} hitSlop={8}>
+            <Pressable onPress={() => router.push("/search" as never)} hitSlop={8}>
               <Search size={20} color="#44403C" strokeWidth={1.8} />
             </Pressable>
 
@@ -65,7 +67,14 @@ export default function HeaderBar() {
             </Pressable>
 
             <Pressable onPress={() => router.push("/account")} hitSlop={8}>
-              <User size={20} color="#44403C" strokeWidth={1.8} />
+              {user?.profilePicture ? (
+                <Image
+                  source={{ uri: user.profilePicture }}
+                  style={styles.profilePic}
+                />
+              ) : (
+                <User size={20} color="#44403C" strokeWidth={1.8} />
+              )}
             </Pressable>
           </View>
         </View>
@@ -138,5 +147,10 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: "bold",
     color: "#FFFFFF",
+  },
+  profilePic: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
   },
 });
