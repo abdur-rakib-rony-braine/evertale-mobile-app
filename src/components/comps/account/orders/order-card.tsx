@@ -1,11 +1,13 @@
 import { ExternalLink, Package } from "lucide-react-native";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
 
 import { formatCurrency } from "@/lib/format";
 import AddressDialog from "./address-dialog";
 import OrderActions from "./order-actions";
-import { formatOrderDate, getStatusLabel, getTrackingUrl } from "./order-utils";
+import { formatOrderDate, getTrackingUrl } from "./order-utils";
 import ProductImages from "./product-images";
+import OrderStatus from "./order-status";
 
 interface OrderCardProps {
   order: any;
@@ -13,9 +15,12 @@ interface OrderCardProps {
 }
 
 export default function OrderCard({ order, onPress }: OrderCardProps) {
+  const router = useRouter();
+
   if (!order) return null;
 
   const {
+    _id,
     orderId,
     createdAt,
     total,
@@ -24,25 +29,39 @@ export default function OrderCard({ order, onPress }: OrderCardProps) {
     trackingInfo,
   } = order;
 
+  // Get the dynamic status label (handles returns/exchanges)
+  const statusLabel =
+    order.returns?.length > 0
+      ? `Return: ${order.returns[0].status}`
+      : order.exchanges?.length > 0
+      ? `Exchange: ${order.exchanges[0].status}`
+      : order.orderStatus;
+
+  const handlePress = () => {
+    if (onPress) {
+      onPress(order);
+    } else {
+      router.push(`/order/${_id}` as never);
+    }
+  };
+
   return (
     <View style={styles.wrapper}>
       <Pressable
         style={({ pressed }) => [styles.card, pressed && styles.pressed]}
-        onPress={() => onPress?.(order)}
-        disabled={!onPress}
+        onPress={handlePress}
       >
         <View style={styles.topBar}>
-          <View style={styles.pill}>
-            <Text style={styles.pillText} numberOfLines={1}>
-              {getStatusLabel(order)}
-            </Text>
-          </View>
+          {/* REPLACED THE TEXT PILL WITH THE NEW COMPONENT */}
+          <OrderStatus status={statusLabel} />
+          
           <Text style={styles.date}>{formatOrderDate(createdAt)}</Text>
         </View>
 
         <ProductImages products={orderProducts} />
 
         <View style={styles.details}>
+          {/* ... rest of the details */}
           <View style={styles.row}>
             <View style={styles.itemsGroup}>
               <Package size={14} color="#A8A29E" strokeWidth={1.8} />
@@ -61,26 +80,27 @@ export default function OrderCard({ order, onPress }: OrderCardProps) {
           </View>
 
           {trackingInfo?.trackingNumber ? (
-            <View style={styles.trackingBox}>
+            <Pressable
+              style={styles.trackingBox}
+              onPress={() =>
+                Linking.openURL(
+                  getTrackingUrl(trackingInfo.carrier, trackingInfo.trackingNumber)
+                )
+              }
+            >
               <View style={styles.trackingLeft}>
                 <View style={styles.dot} />
                 <Text style={styles.trackingCarrier}>
                   {trackingInfo.carrier || "Australia Post"}
                 </Text>
               </View>
-              <Pressable
-                style={styles.trackingLink}
-                hitSlop={6}
-                onPress={() =>
-                  Linking.openURL(
-                    getTrackingUrl(trackingInfo.carrier, trackingInfo.trackingNumber)
-                  )
-                }
-              >
-                <Text style={styles.trackingNumber}>{trackingInfo.trackingNumber}</Text>
+              <View style={styles.trackingLink}>
+                <Text style={styles.trackingNumber}>
+                  {trackingInfo.trackingNumber}
+                </Text>
                 <ExternalLink size={12} color="#15803D" />
-              </Pressable>
-            </View>
+              </View>
+            </Pressable>
           ) : null}
 
           {shippingAddress ? <AddressDialog address={shippingAddress} /> : null}
@@ -93,6 +113,7 @@ export default function OrderCard({ order, onPress }: OrderCardProps) {
 }
 
 const styles = StyleSheet.create({
+  // ... same styles as before, you can delete `pill` and `pillText` styles
   wrapper: { width: "100%" },
   card: {
     backgroundColor: "#FFFFFF",
@@ -112,32 +133,9 @@ const styles = StyleSheet.create({
     borderBottomColor: "#F5F5F4",
     gap: 8,
   },
-  pill: {
-    flexShrink: 1,
-    borderWidth: 1,
-    borderColor: "#E7E5E4",
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 10,
-    paddingVertical: 2,
-  },
-  pillText: {
-    fontSize: 11,
-    fontWeight: "600",
-    letterSpacing: 1.2,
-    color: "#57534E",
-    textTransform: "uppercase",
-  },
   date: { fontSize: 12, color: "#A8A29E" },
-  details: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-    gap: 10,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
+  details: { paddingHorizontal: 16, paddingBottom: 16, gap: 10 },
+  row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   itemsGroup: { flexDirection: "row", alignItems: "center", gap: 6 },
   itemsText: { fontSize: 12, color: "#78716C" },
   total: { fontSize: 14, fontWeight: "600", color: "#292524" },

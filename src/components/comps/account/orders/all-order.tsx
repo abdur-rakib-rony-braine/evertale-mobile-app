@@ -22,18 +22,16 @@ import {
 
 interface AllOrderProps {
   initialOrders: any[];
-  onOrderPress?: (order: any) => void;
   refreshing?: boolean;
   onRefresh?: () => void;
 }
 
 export default function AllOrder({
   initialOrders,
-  onOrderPress,
   refreshing,
   onRefresh,
 }: AllOrderProps) {
-  const router = useRouter();
+  const router = useRouter(); // <--- Initialize router
   const listRef = useRef<FlatList>(null);
   const [filter, setFilter] = useState<FilterValue>("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -62,6 +60,11 @@ export default function AllOrder({
   const goToPage = (page: number) => {
     setCurrentPage(page);
     listRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
+
+  const handleOrderPress = (order: any) => {
+    // Navigate to the order details screen using the _id
+    router.push(`/order/${order._id}` as never);
   };
 
   const filterLabel = FILTER_OPTIONS.find((o) => o.value === filter)?.label;
@@ -160,7 +163,9 @@ export default function AllOrder({
         ref={listRef}
         data={paginatedOrders}
         keyExtractor={(item, index) => String(item._id || item.id || index)}
-        renderItem={({ item }) => <OrderCard order={item} onPress={onOrderPress} />}
+        renderItem={({ item }) => (
+          <OrderCard order={item} onPress={handleOrderPress} />
+        )}
         ListHeaderComponent={header}
         ListFooterComponent={footer}
         ListEmptyComponent={empty}

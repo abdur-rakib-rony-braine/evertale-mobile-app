@@ -1,6 +1,8 @@
 import { StyleSheet, View } from "react-native";
 
 import BuyAgainButton from "./buy-again-button";
+import ExchangeButton from "./exchange-button";
+import ReturnButton from "./return-button";
 import { isWithin30Days } from "./order-utils";
 
 interface OrderActionsProps {
@@ -18,8 +20,8 @@ export default function OrderActions({ order }: OrderActionsProps) {
   return (
     <View style={styles.container}>
       <BuyAgainButton order={order} />
-      {hasReturnEligibleProducts ? null : null}
-      {hasExchangeEligibleProducts ? null : null}
+      {hasReturnEligibleProducts && <ReturnButton order={order} />}
+      {hasExchangeEligibleProducts && <ExchangeButton order={order} />}
     </View>
   );
 }

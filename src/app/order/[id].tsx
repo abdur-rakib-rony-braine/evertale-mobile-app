@@ -10,15 +10,14 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import CustomerInfo from "@/components/orders/customer-info";
-import ExchangeDetails from "@/components/orders/exchange-details";
-import OrderSummary from "@/components/orders/order-summary";
-import ProductItem from "@/components/orders/product-item";
-import RefundDetails from "@/components/orders/refund-details";
-import ReturnDetails from "@/components/orders/return-details";
-import ShippingInfo from "@/components/orders/shipping-info";
 import { apiClient } from "@/lib/api/client";
+import ProductItem from "@/components/comps/account/orders/product-item";
+import ReturnDetails from "@/components/comps/account/orders/return-details";
+import ExchangeDetails from "@/components/comps/account/orders/exchange-details";
+import RefundDetails from "@/components/comps/account/orders/refund-details";
+import OrderSummary from "@/components/comps/account/orders/order-summary";
+import CustomerInfo from "@/components/comps/account/orders/customer-info";
+import ShippingInfo from "@/components/comps/account/orders/shipping-info";
 
 export default function OrderDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -33,11 +32,9 @@ export default function OrderDetailsScreen() {
 
     const fetchOrder = async () => {
       try {
-        // Fetching from the mobile-orders route we created earlier
         const res = await apiClient.get("/api/mobile-orders");
         
         if (res.data?.success) {
-          // Find the specific order by ID
           const order = res.data.orders.find((o: any) => o._id === id);
           if (order) {
             if (!cancelled) setOrderData(order);
