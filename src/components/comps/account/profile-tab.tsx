@@ -1,33 +1,33 @@
+import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
+import { File } from "expo-file-system";
 import {
-    Calendar,
-    Camera,
-    CheckCircle,
-    Clock,
-    CreditCard,
-    Globe,
-    Hash,
-    Mail,
-    MapPin,
-    Pen,
-    Phone,
-    Shield,
-    User,
-    XCircle
+  Calendar,
+  Camera,
+  CheckCircle,
+  Clock,
+  CreditCard,
+  Globe,
+  Hash,
+  Mail,
+  MapPin,
+  Pen,
+  Phone,
+  Shield,
+  User,
+  XCircle
 } from "lucide-react-native";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 
-import { apiClient } from "@/lib/api/client";
 import { useAuthStore } from "@/store/auth-store";
 
 const formatDate = (d?: string) =>
@@ -77,85 +77,84 @@ const StatusBadge = ({ active, label, description }: any) => (
 export default function ProfileTab() {
   const { user, updateUser } = useAuthStore();
   const [isUploading, setIsUploading] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+
+  const u = user as any;
+  const userId = String(u?._id || u?.id || "");
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
     });
 
-    if (!result.canceled && result.assets[0]) {
-      setIsUploading(true);
-      try {
-        const formData = new FormData();
-        const file = result.assets[0];
-        
-        formData.append("profilePicture", {
-          uri: file.uri,
-          type: file.mimeType || "image/jpeg",
-          name: file.fileName || "profile.jpg",
-        } as any);
-        formData.append("userId", user?._id || "");
+    if (result.canceled || !result.assets[0]) return;
 
-        // Using fetch instead of apiClient for FormData so axios sets the right boundary
-        const token = useAuthStore.getState().token;
-        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/upload-profile-picture`, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-          },
-          body: formData,
-        });
+    setIsUploading(true);
+    try {
+      const asset = result.assets[0];
+      const formData = new FormData();
 
-        const data = await res.json();
-        if (res.ok) {
-          updateUser({ profilePicture: data.imageUrl });
-          Alert.alert("Success", "Profile picture updated!");
-        } else {
-          throw new Error("Upload failed");
-        }
-      } catch (error) {
-        Alert.alert("Error", "Failed to upload image.");
-      } finally {
-        setIsUploading(false);
-      }
-    }
-  };
+      formData.append("profilePicture", new File(asset.uri) as any);
+      formData.append("userId", userId);
 
-  const handleDelete = async () => {
-    Alert.alert("Delete Picture", "Are you sure you want to remove your profile picture?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          setIsUploading(true);
-          try {
-            await apiClient.delete(`/api/upload-profile-picture?userId=${user?._id}`);
-            updateUser({ profilePicture: undefined });
-          } catch {
-            Alert.alert("Error", "Failed to delete picture.");
-          } finally {
-            setIsUploading(false);
-          }
+      const token = useAuthStore.getState().token;
+      const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/upload-profile-picture`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
         },
-      },
-    ]);
+        body: formData,
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        console.log("upload failed", res.status, data, { userId });
+        throw new Error(`${res.status}: ${data?.details || data?.error || "Upload failed"}`);
+      }
+
+      setImageFailed(false);
+      updateUser({ profilePicture: data.imageUrl });
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Profile picture updated!",
+      });
+    } catch (error: any) {
+      console.log("upload failed", error);
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: error?.message || "Failed to upload image.",
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
-      
+
       <View style={styles.avatarSection}>
         <Pressable style={styles.avatarContainer} onPress={pickImage}>
-          {user?.profilePicture ? (
-            <Image source={{ uri: user.profilePicture }} style={styles.avatar} />
+          {u?.profilePicture && !imageFailed ? (
+            <Image
+              source={{ uri: u.profilePicture }}
+              style={styles.avatar}
+              contentFit="cover"
+              transition={150}
+              onError={(e) => {
+                console.log("avatar load error", u.profilePicture, e);
+                setImageFailed(true);
+              }}
+            />
           ) : (
             <View style={styles.avatarPlaceholder}>
               <Text style={styles.avatarInitials}>
-                {user?.firstName?.[0]}{user?.lastName?.[0]}
+                {u?.firstName?.[0]}{u?.lastName?.[0]}
               </Text>
             </View>
           )}
@@ -169,9 +168,9 @@ export default function ProfileTab() {
         </Pressable>
 
         <Text style={styles.userName}>
-          {user?.firstName} {user?.lastName}
+          {u?.firstName} {u?.lastName}
         </Text>
-        <Text style={styles.userEmail}>{user?.email}</Text>
+        <Text style={styles.userEmail}>{u?.email}</Text>
       </View>
 
       <View style={styles.card}>
@@ -180,12 +179,12 @@ export default function ProfileTab() {
           <Text style={styles.cardTitle}>PERSONAL DETAILS</Text>
         </View>
         <View style={styles.grid}>
-          <InfoRow icon={Hash} label="User ID" value={user?._id?.slice(-6).toUpperCase()} />
-          <InfoRow icon={User} label="First Name" value={user?.firstName} />
-          <InfoRow icon={User} label="Last Name" value={user?.lastName} />
-          <InfoRow icon={Mail} label="Email" value={user?.email} />
-          <InfoRow icon={Phone} label="Phone" value={user?.phone} />
-          <InfoRow icon={Calendar} label="Date of Birth" value={formatDate()} />
+          <InfoRow icon={Hash} label="User ID" value={userId.slice(-6).toUpperCase()} />
+          <InfoRow icon={User} label="First Name" value={u?.firstName} />
+          <InfoRow icon={User} label="Last Name" value={u?.lastName} />
+          <InfoRow icon={Mail} label="Email" value={u?.email} />
+          <InfoRow icon={Phone} label="Phone" value={u?.phone} />
+          <InfoRow icon={Calendar} label="Date of Birth" value={formatDate(u?.dob)} />
         </View>
       </View>
 
@@ -195,12 +194,12 @@ export default function ProfileTab() {
           <Text style={styles.cardTitle}>ADDRESS DETAILS</Text>
         </View>
         <View style={styles.grid}>
-          <InfoRow icon={MapPin} label="Primary Address" value={"Not set"} />
-          <InfoRow icon={MapPin} label="Secondary Address" value={"Not set"} />
-          <InfoRow icon={Globe} label="Suburb" value={"Not set"} />
-          <InfoRow icon={Hash} label="Postcode" value={"Not set"} />
-          <InfoRow icon={MapPin} label="State" value={"Not set"} />
-          <InfoRow icon={Globe} label="Country" value={"Australia"} />
+          <InfoRow icon={MapPin} label="Primary Address" value={u?.address} />
+          <InfoRow icon={MapPin} label="Secondary Address" value={u?.address2} />
+          <InfoRow icon={Globe} label="Suburb" value={u?.suburb} />
+          <InfoRow icon={Hash} label="Postcode" value={u?.postcode} />
+          <InfoRow icon={MapPin} label="State" value={u?.state} />
+          <InfoRow icon={Globe} label="Country" value={u?.country || "Australia"} />
         </View>
       </View>
 
@@ -242,8 +241,8 @@ export default function ProfileTab() {
           <Text style={styles.cardTitle}>ACCOUNT TIMELINE</Text>
         </View>
         <View style={styles.grid}>
-          <InfoRow icon={Calendar} label="Account Created" value={formatDateTime()} />
-          <InfoRow icon={Pen} label="Last Updated" value={formatDateTime()} />
+          <InfoRow icon={Calendar} label="Account Created" value={formatDateTime(u?.createdAt)} />
+          <InfoRow icon={Pen} label="Last Updated" value={formatDateTime(u?.updatedAt)} />
         </View>
       </View>
     </ScrollView>
@@ -253,18 +252,18 @@ export default function ProfileTab() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FAFAF9" },
   avatarSection: { alignItems: "center", paddingVertical: 24 },
-  avatarContainer: { width: 96, height: 96, borderRadius: 48, marginBottom: 12, position: "relative" },
+  avatarContainer: { width: 96, height: 96, borderRadius: 48, marginBottom: 12, position: "relative", overflow: "hidden" },
   avatar: { width: 96, height: 96, borderRadius: 48 },
   avatarPlaceholder: { width: 96, height: 96, borderRadius: 48, backgroundColor: "#AE7857", alignItems: "center", justifyContent: "center" },
   avatarInitials: { color: "#FFF", fontSize: 24, fontWeight: "600" },
-  cameraOverlay: { position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: "rgba(0,0,0,0.4)", height: 32, alignItems: "center", justifyContent: "center", borderBottomLeftRadius: 48, borderBottomRightRadius: 48 },
+  cameraOverlay: { position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: "rgba(0,0,0,0.4)", height: 32, alignItems: "center", justifyContent: "center" },
   userName: { fontSize: 18, fontWeight: "600", color: "#292524", textTransform: "capitalize" },
   userEmail: { fontSize: 13, color: "#78716C", marginTop: 2 },
 
   card: { backgroundColor: "#FFF", marginHorizontal: 16, marginBottom: 16, borderWidth: 1, borderColor: "#F5F5F4", padding: 16 },
   cardHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 16 },
   cardTitle: { fontSize: 11, fontWeight: "600", color: "#A8A29E", letterSpacing: 1 },
-  
+
   grid: { gap: 16 },
   infoRow: { flexDirection: "row", alignItems: "flex-start" },
   icon: { marginTop: 2, marginRight: 12 },

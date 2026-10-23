@@ -1,7 +1,8 @@
 import { images } from "@/constants/images";
+import { Image as ExpoImage } from "expo-image";
 import { useRouter } from "expo-router";
 import { Heart, Menu, Search, ShoppingBag, User } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useAuthStore } from "@/store/auth-store";
@@ -11,11 +12,16 @@ import MobileDrawer from "./mobile-drawer";
 
 export default function HeaderBar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [picFailed, setPicFailed] = useState(false);
   const router = useRouter();
-  
+
   const cartTotal = useCartStore((s) => s.totalItems);
   const wishlistCount = useWishlistStore((s) => s.count);
   const user = useAuthStore((s) => s.user);
+
+  useEffect(() => {
+    setPicFailed(false);
+  }, [user?.profilePicture]);
 
   return (
     <>
@@ -67,10 +73,13 @@ export default function HeaderBar() {
             </Pressable>
 
             <Pressable onPress={() => router.push("/account")} hitSlop={8}>
-              {user?.profilePicture ? (
-                <Image
+              {user?.profilePicture && !picFailed ? (
+                <ExpoImage
                   source={{ uri: user.profilePicture }}
                   style={styles.profilePic}
+                  contentFit="cover"
+                  transition={150}
+                  onError={() => setPicFailed(true)}
                 />
               ) : (
                 <User size={20} color="#44403C" strokeWidth={1.8} />
@@ -149,8 +158,8 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
   profilePic: {
-    width: 24,
-    height: 24,
+    width: 28,
+    height: 28,
     borderRadius: 12,
   },
 });

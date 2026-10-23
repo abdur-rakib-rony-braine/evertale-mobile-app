@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { Camera, Globe, Play, Plus, X } from "lucide-react-native";
+import { Camera, Globe, LogOut, Play, Plus, X } from "lucide-react-native";
 import { useEffect } from "react";
 import {
   Dimensions,
@@ -17,9 +17,11 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import Toast from "react-native-toast-message";
 
 import { images } from "@/constants/images";
 import { urls } from "@/constants/url";
+import { useAuthStore } from "@/store/auth-store";
 
 const { width } = Dimensions.get("window");
 const DRAWER_WIDTH = Math.min(width * 0.85, 360);
@@ -73,6 +75,8 @@ const TikTokIcon = ({ size = 16, color = "#A8A29E" }) => (
 
 export default function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
   const router = useRouter();
+  const token = useAuthStore((s) => s.token);
+  const logout = useAuthStore((s) => s.logout);
   const translateX = useSharedValue(-DRAWER_WIDTH);
 
   useEffect(() => {
@@ -93,6 +97,16 @@ export default function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
 
   const openLink = (url: string) => {
     Linking.openURL(url);
+  };
+
+  const handleLogout = async () => {
+    onClose();
+    await logout();
+    router.replace("/");
+    Toast.show({
+      type: "success",
+      text1: "Logged out",
+    });
   };
 
   return (
@@ -157,6 +171,15 @@ export default function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
                   <Text style={styles.accountLinkText}>{link.title}</Text>
                 </Pressable>
               ))}
+
+              {token ? (
+                <Pressable onPress={handleLogout} style={styles.categoryRow}>
+                  <View style={styles.logoutInner}>
+                    <LogOut size={16} color="#DC2626" />
+                    <Text style={styles.logoutText}>Logout</Text>
+                  </View>
+                </Pressable>
+              ) : null}
             </View>
           </View>
         </ScrollView>
@@ -250,6 +273,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     color: "#44403C",
+  },
+  logoutInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  logoutText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#DC2626",
   },
   footer: {
     paddingHorizontal: 20,

@@ -73,7 +73,7 @@ export default function SettingsTab() {
       setIsUpdating(false);
     }
   };
-  console.log('data', JSON.stringify(user))
+
   const formContent = (
     <>
       <View style={styles.card}>

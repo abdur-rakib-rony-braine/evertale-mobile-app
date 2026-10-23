@@ -1,42 +1,52 @@
-import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { Package } from "lucide-react-native";
+import { useCallback, useEffect, useState } from "react";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { RefreshCw } from "lucide-react-native";
 
 import { apiClient } from "@/lib/api/client";
-import { formatCurrency } from "@/lib/format";
+import AllOrder from "./orders/all-order";
 
 export default function OrdersTab() {
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  const fetchOrders = useCallback(async () => {
+    try {
+      const res = await apiClient.get("/api/mobile-orders");
+      if (res.data?.success) {
+        setOrders(res.data.orders || []);
+        setHasError(false);
+      } else {
+        setHasError(true);
+      }
+    } catch {
+      setHasError(true);
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
-
-    const fetchOrders = async () => {
-      try {
-        const res = await apiClient.get("/api/mobile-orders");
-        if (!cancelled && res.data.success) {
-          setOrders(res.data.orders);
-        }
-      } catch (error) {
-        console.log("Failed to fetch orders", error);
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    };
-
-    fetchOrders();
-
+    (async () => {
+      await fetchOrders();
+      if (!cancelled) setIsLoading(false);
+    })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [fetchOrders]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchOrders();
+    setRefreshing(false);
+  };
+
+  const retry = async () => {
+    setIsLoading(true);
+    await fetchOrders();
+    setIsLoading(false);
+  };
 
   if (isLoading) {
     return (
@@ -46,100 +56,146 @@ export default function OrdersTab() {
     );
   }
 
-  if (orders.length === 0) {
+  if (hasError && orders.length === 0) {
     return (
       <View style={styles.centerContent}>
-        <Package size={40} color="#D6D3D1" />
-        <Text style={styles.emptyText}>No orders found.</Text>
+        <Text style={styles.errorText}>Failed to load orders.</Text>
+        <Pressable style={styles.retryBtn} onPress={retry}>
+          <RefreshCw size={14} color="#FFFFFF" />
+          <Text style={styles.retryText}>RETRY</Text>
+        </Pressable>
       </View>
     );
   }
 
   return (
-    <FlatList
-      data={orders}
-      keyExtractor={(item) => item._id}
-      contentContainerStyle={{ padding: 16, gap: 16 }}
-      renderItem={({ item }) => (
-        <View style={styles.orderCard}>
-          <View style={styles.orderHeader}>
-            <Text style={styles.orderId}>
-              Order #{item.orderId || item._id.slice(-6).toUpperCase()}
-            </Text>
-            <Text style={styles.orderStatus}>{item.orderStatus}</Text>
-          </View>
-          <Text style={styles.orderDate}>
-            {new Date(item.createdAt).toLocaleDateString("en-AU", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </Text>
-          <View style={styles.orderFooter}>
-            <Text style={styles.orderTotal}>{formatCurrency(item.total)}</Text>
-            <Text style={styles.orderItems}>
-              {item.orderProducts?.length || 0} items
-            </Text>
-          </View>
-        </View>
-      )}
-    />
+    <View style={styles.container}>
+      <AllOrder initialOrders={orders} refreshing={refreshing} onRefresh={onRefresh} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#FAFAF9" },
   centerContent: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 40,
+    gap: 12,
   },
-  emptyText: {
-    fontSize: 14,
-    color: "#A8A29E",
-    marginTop: 12,
-  },
-  orderCard: {
-    borderWidth: 1,
-    borderColor: "#E7E5E4",
-    padding: 16,
-    backgroundColor: "#FFFFFF",
-  },
-  orderHeader: {
+  errorText: { fontSize: 14, color: "#A8A29E" },
+  retryBtn: {
+    height: 40,
+    paddingHorizontal: 20,
+    backgroundColor: "#AE7857",
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
+    alignItems: "center",
+    gap: 8,
   },
-  orderId: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#292524",
-  },
-  orderStatus: {
-    fontSize: 11,
-    color: "#AE7857",
-    fontWeight: "700",
-    textTransform: "uppercase",
-  },
-  orderDate: {
-    fontSize: 12,
-    color: "#78716C",
-    marginBottom: 12,
-  },
-  orderFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    borderTopWidth: 1,
-    borderTopColor: "#F5F5F4",
-    paddingTop: 12,
-  },
-  orderTotal: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#292524",
-  },
-  orderItems: {
-    fontSize: 12,
-    color: "#78716C",
-  },
+  retryText: { color: "#FFFFFF", fontSize: 12, fontWeight: "600", letterSpacing: 1.5 },
 });
+
+
+
+
+
+
+
+
+
+
+// ............WEB VIEW CODE IMPORTANT FOR REFERENCE..............
+// import { useRef, useState } from "react";
+// import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+// import { WebView } from "react-native-webview";
+// import { RefreshCw } from "lucide-react-native";
+
+// import { urls } from "@/constants/url";
+// import { useAuthStore } from "@/store/auth-store";
+
+// export default function OrdersTab() {
+//   const token = useAuthStore((s) => s.token);
+//   const webRef = useRef<WebView>(null);
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [hasError, setHasError] = useState(false);
+
+//   const uri = `${urls.api.base}/api/mobile-web-login?next=${encodeURIComponent("/account/orders")}`;
+
+//   const retry = () => {
+//     setHasError(false);
+//     setIsLoading(true);
+//     webRef.current?.reload();
+//   };
+
+//   if (hasError) {
+//     return (
+//       <View style={styles.centerContent}>
+//         <Text style={styles.errorText}>Failed to load orders.</Text>
+//         <Pressable style={styles.retryBtn} onPress={retry}>
+//           <RefreshCw size={14} color="#FFFFFF" />
+//           <Text style={styles.retryText}>RETRY</Text>
+//         </Pressable>
+//       </View>
+//     );
+//   }
+
+//   return (
+//     <View style={styles.container}>
+//       <WebView
+//         ref={webRef}
+//         source={{ uri, headers: { Authorization: `Bearer ${token}` } }}
+//         style={styles.webview}
+//         incognito
+//         domStorageEnabled
+//         javaScriptEnabled
+//         pullToRefreshEnabled
+//         startInLoadingState={false}
+//         onLoadStart={() => setIsLoading(true)}
+//         onLoadEnd={() => setIsLoading(false)}
+//         onNavigationStateChange={(nav) => console.log("webview nav", nav.url)}
+//         onError={(e) => {
+//           console.log("webview error", e.nativeEvent);
+//           setHasError(true);
+//         }}
+//         onHttpError={(e) => {
+//           const { statusCode, url } = e.nativeEvent;
+//           console.log("webview http error", statusCode, url);
+//           const isMain = url.includes("/api/mobile-web-login") || url.includes("/account/orders");
+//           if (isMain && statusCode >= 400) setHasError(true);
+//         }}
+//       />
+//       {isLoading ? (
+//         <View style={styles.loader} pointerEvents="none">
+//           <ActivityIndicator color="#AE7857" />
+//         </View>
+//       ) : null}
+//     </View>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   container: { flex: 1, backgroundColor: "#FFFFFF" },
+//   webview: { flex: 1, backgroundColor: "#FFFFFF" },
+//   loader: {
+//     ...StyleSheet.absoluteFill,
+//     alignItems: "center",
+//     justifyContent: "center",
+//     backgroundColor: "#FFFFFF",
+//   },
+//   centerContent: {
+//     flex: 1,
+//     alignItems: "center",
+//     justifyContent: "center",
+//     gap: 12,
+//   },
+//   errorText: { fontSize: 14, color: "#A8A29E" },
+//   retryBtn: {
+//     height: 40,
+//     paddingHorizontal: 20,
+//     backgroundColor: "#AE7857",
+//     flexDirection: "row",
+//     alignItems: "center",
+//     gap: 8,
+//   },
+//   retryText: { color: "#FFFFFF", fontSize: 12, fontWeight: "600", letterSpacing: 1.5 },
+// });
