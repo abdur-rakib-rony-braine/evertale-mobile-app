@@ -1,5 +1,6 @@
+import { images } from "@/constants/images";
 import { useEffect } from "react";
-import { Dimensions, Image, StyleSheet, Text, View } from "react-native";
+import { Dimensions, StyleSheet, Text } from "react-native";
 import Animated, {
   Easing,
   runOnJS,
@@ -9,6 +10,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import { WithLocalSvg } from "react-native-svg/css";
 
 const { width } = Dimensions.get("window");
 const LOGO_SIZE = width * 0.4;
@@ -76,13 +78,13 @@ export default function AnimatedSplashOverlay({
   return (
     <Animated.View
       pointerEvents="none"
-      style={[styles.container, containerStyle]}
+      style={[StyleSheet.absoluteFill, styles.container, containerStyle]}
     >
       <Animated.View style={logoStyle}>
-        <Image
-          source={require("../../assets/images/logo.png")}
-          style={styles.logo}
-          resizeMode="contain"
+        <WithLocalSvg
+          asset={images.logo}
+          width={LOGO_SIZE}
+          height={LOGO_SIZE}
         />
       </Animated.View>
 
@@ -95,7 +97,6 @@ export default function AnimatedSplashOverlay({
 
 const styles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFill,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
@@ -106,7 +107,6 @@ const styles = StyleSheet.create({
     height: LOGO_SIZE,
   },
   tagline: {
-    marginTop: 20,
     fontSize: 14,
     letterSpacing: 2,
     color: "#AE7857",

@@ -1,14 +1,16 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from "expo-router";
+import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useColorScheme } from "react-native";
 import { useFonts } from "expo-font";
 import { useEffect, useState } from "react";
-import AppTabs from "@/components/app-tabs";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import AnimatedSplashOverlay from "@/components/comps/animated-splash-overlay";
 
 SplashScreen.preventAutoHideAsync();
 
-export default function TabLayout() {
+export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [splashVisible, setSplashVisible] = useState(true);
 
@@ -27,11 +29,17 @@ export default function TabLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <AppTabs />
-      {splashVisible && (
-        <AnimatedSplashOverlay onFinish={() => setSplashVisible(false)} />
-      )}
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
+          </Stack>
+          {splashVisible && (
+            <AnimatedSplashOverlay onFinish={() => setSplashVisible(false)} />
+          )}
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

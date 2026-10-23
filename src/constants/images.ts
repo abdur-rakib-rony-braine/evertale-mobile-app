@@ -1,3 +1,60 @@
 export const images = {
-  logo: require("../../assets/images/logo.svg")
+  logo: require("../../assets/images/logo.svg"),
+  logoWhite: require("../../assets/images/logo-white.svg"),
+  logoGlow: require("../../assets/images/logo-glow.png"),
+  icon: require("../../assets/images/icon.png"),
+  iconWeb: require("../../assets/images/icon web.svg"),
+  favicon: require("../../assets/images/favicon.png"),
+  faviconEvertale: require("../../assets/images/favicon-evertale.svg"),
+  splashIcon: require("../../assets/images/splash-icon.png"),
+  adaptiveIconBackground: require("../../assets/images/android-icon-background.png"),
+  adaptiveIconForeground: require("../../assets/images/android-icon-foreground.png"),
+  adaptiveIconMonochrome: require("../../assets/images/android-icon-monochrome.png"),
+  
+  womenCategory: require("../../assets/images/women-category.webp"),
+  kidsCategory: require("../../assets/images/kid-category.webp"),
+  kidsCategoryAlt: require("../../assets/images/kids-category.webp"),
+  menCategory: require("../../assets/images/men-category.webp"),
+  
+  womenMidi: require("../../assets/images/women-midi.webp"),
+  womenMaxi: require("../../assets/images/women-maxi.webp"),
+  kidMidi: require("../../assets/images/kid-midi.webp"),
+  kidMini: require("../../assets/images/kid-mini.webp"),
+  
+  comingSoon: require("../../assets/images/coming-soon.jpg"),
+  comingSoonCategory: require("../../assets/images/coming-soon-cate....jpg"),
+  countdownBackground: require("../../assets/images/countdown-backgr....gif"),
+  
+  instagramImage: require("../../assets/images/instagram-image.png"),
+  loginImage: require("../../assets/images/login-image.png"),
+  tutorialWeb: require("../../assets/images/tutorial-web.png"),
+  dashboardBg: require("../../assets/images/dashboardbg.png"),
+  
+  afterpay: require("../../assets/images/afterpay.png"),
+  afterpayLogo: require("../../assets/images/afterpay-logo.webp"),
+  afterpayDoc: require("../../assets/images/afterpay-doc.png"),
+  americanExpress: require("../../assets/images/american-express.png"),
+  googlePay: require("../../assets/images/GPay_Acceptance_....png"),
+  mastercard: require("../../assets/images/mastercard.png"),
+  visa: require("../../assets/images/visa.png"),
+  paypal: require("../../assets/images/paypal.png"),
+  paymentMethodCheckout: require("../../assets/images/payment-method-c....png"),
+  allPaymentMethods: require("../../assets/images/all paymentmeth....png"),
+  
+  facebook: require("../../assets/images/facebook.png"),
+  linkedin: require("../../assets/images/linkedin.png"),
+  google: require("../../assets/images/google.png"),
+  
+  ecommerceLottie: require("../../assets/images/ecommerce.lottie"),
+  expoBadge: require("../../assets/images/expo-badge.png"),
+  expoBadgeWhite: require("../../assets/images/expo-badge-white.png"),
+  expoLogo: require("../../assets/images/expo-logo.png"),
+  reactLogo: require("../../assets/images/react-logo.png"),
+  reactLogo2x: require("../../assets/images/react-logo@2x.png"),
+  reactLogo3x: require("../../assets/images/react-logo@3x.png"),
+  vercel: require("../../assets/images/vercel.svg"),
+  
+  pp1: require("../../assets/images/pp1.webp"),
+  pp2: require("../../assets/images/pp2.webp"),
+  pp3: require("../../assets/images/pp3.webp"),
 };
