@@ -1,13 +1,11 @@
 import { images } from "@/constants/images";
 import { Image as ExpoImage } from "expo-image";
 import { useRouter } from "expo-router";
-import { Heart, Menu, ShoppingBag, User } from "lucide-react-native";
+import { Menu, User } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { useAuthStore } from "@/store/auth-store";
-import { useCartStore } from "@/store/cart-store";
-import { useWishlistStore } from "@/store/wishlist-store";
 import { WithLocalSvg } from "react-native-svg/css";
 import MobileDrawer from "./mobile-drawer";
 import SearchComponent from "./search-component";
@@ -17,8 +15,6 @@ export default function HeaderBar() {
   const [picFailed, setPicFailed] = useState(false);
   const router = useRouter();
 
-  const cartTotal = useCartStore((s) => s.totalItems);
-  const wishlistCount = useWishlistStore((s) => s.count);
   const user = useAuthStore((s) => s.user);
 
   useEffect(() => {
@@ -49,30 +45,6 @@ export default function HeaderBar() {
 
           <View style={styles.rightGroup}>
             <SearchComponent />
-
-            {user && (
-              <Pressable onPress={() => router.push("/wishlist" as never)} hitSlop={8}>
-                <View>
-                  <Heart size={20} color="#44403C" strokeWidth={1.8} />
-                  {wishlistCount > 0 && (
-                    <View style={styles.wishlistBadge}>
-                      <Text style={styles.badgeText}>{wishlistCount}</Text>
-                    </View>
-                  )}
-                </View>
-              </Pressable>
-            )}
-
-            <Pressable onPress={() => router.push("/cart" as never)} hitSlop={8}>
-              <View>
-                <ShoppingBag size={20} color="#44403C" strokeWidth={1.8} />
-                {cartTotal > 0 && (
-                  <View style={styles.cartBadge}>
-                    <Text style={styles.badgeText}>{cartTotal}</Text>
-                  </View>
-                )}
-              </View>
-            </Pressable>
 
             <Pressable onPress={() => router.push("/account" as never)} hitSlop={8}>
               {user?.profilePicture && !picFailed ? (
@@ -126,38 +98,9 @@ const styles = StyleSheet.create({
     padding: 4,
     marginLeft: -4,
   },
-  cartBadge: {
-    position: "absolute",
-    right: -8,
-    top: -8,
-    height: 16,
-    minWidth: 16,
-    paddingHorizontal: 4,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 999,
-    backgroundColor: "#AE7857",
-  },
-  wishlistBadge: {
-    position: "absolute",
-    right: -8,
-    top: -8,
-    height: 16,
-    minWidth: 16,
-    paddingHorizontal: 4,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 999,
-    backgroundColor: "#FC5132",
-  },
-  badgeText: {
-    fontSize: 9,
-    fontWeight: "bold",
-    color: "#FFFFFF",
-  },
   profilePic: {
-    width: 28,
-    height: 28,
+    width: 32,
+    height: 32,
     borderRadius: 14,
   },
 });

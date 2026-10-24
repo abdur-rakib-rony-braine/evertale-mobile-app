@@ -1,11 +1,11 @@
 import { Star } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Dimensions,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Dimensions,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { Carousel } from "react-native-reanimated-carousel";
 

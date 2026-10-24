@@ -1,7 +1,10 @@
-import { BottomTabBarProps } from "expo-router/build/react-navigation/bottom-tabs/types";
 import { Home, Heart, ShoppingBag, User } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+
+import { useCartStore } from "@/store/cart-store";
+import { useWishlistStore } from "@/store/wishlist-store";
 
 const ICONS = {
   index: Home,
@@ -17,12 +20,16 @@ const LABELS = {
   account: "Account",
 };
 
-export default function CustomTabBar({ state, navigation }: BottomTabBarProps) {
+export default function CustomTabBar({ state }: any) {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+
+  const cartTotal = useCartStore((s) => s.totalItems);
+  const wishlistCount = useWishlistStore((s) => s.count);
 
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom || 8 }]}>
-      {state.routes.map((route, index) => {
+      {state.routes.map((route: any, index: number) => {
         const isFocused = state.index === index;
         const Icon = ICONS[route.name as keyof typeof ICONS];
         const label = LABELS[route.name as keyof typeof LABELS];
@@ -30,23 +37,30 @@ export default function CustomTabBar({ state, navigation }: BottomTabBarProps) {
         if (!Icon) return null;
 
         const onPress = () => {
-          const event = navigation.emit({
-            type: "tabPress",
-            target: route.key,
-            canPreventDefault: true,
-          });
-          if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name);
+          if (!isFocused) {
+            const href = route.name === "index" ? "/" : `/${route.name}`;
+            router.navigate(href as never);
           }
         };
 
+        const badgeCount = 
+          route.name === "cart" ? cartTotal : 
+          route.name === "wishlist" ? wishlistCount : 0;
+
         return (
           <Pressable key={route.key} onPress={onPress} style={styles.tabItem}>
-            <Icon
-              size={22}
-              color={isFocused ? "#AE7857" : "#78716C"}
-              strokeWidth={isFocused ? 2.2 : 1.6}
-            />
+            <View>
+              <Icon
+                size={22}
+                color={isFocused ? "#AE7857" : "#78716C"}
+                strokeWidth={isFocused ? 2.2 : 1.6}
+              />
+              {badgeCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{badgeCount}</Text>
+                </View>
+              )}
+            </View>
             <Text
               style={[
                 styles.label,
@@ -93,5 +107,24 @@ const styles = StyleSheet.create({
     width: 32,
     backgroundColor: "#AE7857",
     borderRadius: 999,
+  },
+  badge: {
+    position: "absolute",
+    right: -8,
+    top: -6,
+    height: 16,
+    minWidth: 16,
+    paddingHorizontal: 4,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 999,
+    backgroundColor: "#FC5132",
+    borderWidth: 1,
+    borderColor: "#FFFFFF",
+  },
+  badgeText: {
+    fontSize: 9,
+    fontWeight: "bold",
+    color: "#FFFFFF",
   },
 });
