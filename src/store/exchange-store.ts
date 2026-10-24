@@ -35,7 +35,6 @@ export const useExchangeStore = create<ExchangeState>()(
       getAvailableProducts: () => {
         const { currentOrder } = get();
         if (!currentOrder) return [];
-        // Assuming currentOrder.exchangeableProducts contains the eligible items
         return currentOrder.exchangeableProducts || [];
       },
 
@@ -49,7 +48,6 @@ export const useExchangeStore = create<ExchangeState>()(
       isOrderEligibleForExchange: () => {
         const { currentOrder } = get();
         if (!currentOrder) return false;
-        // Basic check: ensure order is within 30 days and has exchangeable items
         const withinWindow = new Date(currentOrder.createdAt) >= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
         return withinWindow && (currentOrder.exchangeableProducts?.length > 0);
       },
@@ -57,7 +55,6 @@ export const useExchangeStore = create<ExchangeState>()(
       isProductExchangeable: (product) => {
         const { currentOrder } = get();
         if (!currentOrder || !product) return false;
-        // Check if the product exists in the exchangeable list
         return currentOrder.exchangeableProducts?.some(
           (p: any) => p.productId === product.productId && p.size === product.size
         );

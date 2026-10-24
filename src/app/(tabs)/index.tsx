@@ -6,6 +6,13 @@ import HeaderBar from "@/components/comps/header-bar";
 import PromotionalBanner from "@/components/comps/promotional-banner";
 import CategorySection from "@/components/comps/category-section";
 import NewArrivals from "@/components/comps/new-arrivals";
+import CollectionsSection from "@/components/others/collections-section";
+import PassionateSection from "@/components/others/passionate-section";
+import WomenProductSection from "@/components/others/women-product-section";
+import KidProductSection from "@/components/others/kid-product-section";
+import ReviewsSection from "@/components/others/reviews";
+import EmailSubscription from "@/components/others/email-subscription";
+import InstagramFollowSection from "@/components/others/instagram-follow";
 
 export default function HomeScreen() {
   return (
@@ -21,6 +28,13 @@ export default function HomeScreen() {
         <PromotionalBanner />
         <CategorySection />
         <NewArrivals />
+        <WomenProductSection />
+        <KidProductSection />
+        <CollectionsSection />
+        <PassionateSection />
+        <ReviewsSection />
+        <EmailSubscription />
+        <InstagramFollowSection />
       </ScrollView>
     </SafeAreaView>
   );

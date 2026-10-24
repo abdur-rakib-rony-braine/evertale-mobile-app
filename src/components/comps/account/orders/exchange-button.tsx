@@ -20,7 +20,6 @@ export default function ExchangeButton({ order }: ExchangeButtonProps) {
 
   const handleClose = () => {
     setOpen(false);
-    reset();
   };
 
   return (

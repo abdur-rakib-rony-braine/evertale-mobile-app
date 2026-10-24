@@ -93,12 +93,13 @@ export default function ReturnContent({ onClose }: ReturnContentProps) {
           type: "success",
           text1: "Return request submitted successfully",
         });
-        reset();
         onClose();
+        setTimeout(() => reset(), 300);
       } else {
         throw new Error(res.data.error || "Failed request");
       }
     } catch (err: any) {
+      console.log("err", err)
       Toast.show({
         type: "error",
         text1: err.response?.data?.error || err.message || "Something went wrong",
