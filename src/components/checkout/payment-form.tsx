@@ -25,6 +25,7 @@ import { useCheckoutStore } from "@/store/checkout-store";
 import { useCartStore } from "@/store/cart-store";
 import { useCheckoutStepStore } from "@/store/checkout-step-store";
 import { useDiscountStore } from "@/store/discount-store";
+import { useAuthStore } from "@/store/auth-store";
 import { apiClient } from "@/lib/api/client";
 
 const PAYMENT_METHODS = [
@@ -36,10 +37,19 @@ const PAYMENT_METHODS = [
 export default function PaymentForm() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const userId = useAuthStore((s) => s.user?._id ?? null);
 
-  const { cartItems, totalAmount } = useCartStore();
-  const { appliedDiscount, freeShipping, shipping, discountCode } = useDiscountStore();
-  const { shippingAddress, billingAddress, notes, deliveryInstructions, resetCheckout } = useCheckoutStore();
+  const { cartItems, totalAmount, clearCart } = useCartStore();
+  const { appliedDiscount, freeShipping } = useDiscountStore();
+  const {
+    shippingAddress,
+    billingAddress,
+    shipping,
+    notes,
+    deliveryInstructions,
+    setOrderId,
+    resetCheckout,
+  } = useCheckoutStore();
   const { resetSteps } = useCheckoutStepStore();
 
   const [selected, setSelected] = useState("card");
@@ -59,7 +69,6 @@ export default function PaymentForm() {
       Toast.show({ type: "error", text1: "Your cart is empty" });
       return;
     }
-
     if (!shippingAddress?.firstName) {
       Toast.show({ type: "error", text1: "Please complete your shipping address" });
       return;
@@ -68,7 +77,6 @@ export default function PaymentForm() {
     setIsLoading(true);
 
     try {
-      // 1. Create the temporary Checkout Session on the backend
       const { data } = await apiClient.post("/api/checkout/session", {
         items: cartItems,
         shippingAddress,
@@ -76,17 +84,14 @@ export default function PaymentForm() {
         shippingMethod: shipping,
         total: finalTotal,
         discountApplied: appliedDiscount,
-        discountCode: discountCode || null,
         notes,
         deliveryInstructions,
       });
 
       const sessionId = data.sessionId;
+      setOrderId(sessionId);
 
-      // 2. Build the WebView URL using the returned sessionId
       const url = `https://evertale.com.au/mobile-payment?sessionId=${sessionId}&method=${selected}`;
-
-      // 3. Open the WebView
       setPaymentUrl(url);
       setShowWebView(true);
     } catch (error: any) {
@@ -102,7 +107,6 @@ export default function PaymentForm() {
   const handleWebViewNavigation = (navState: any) => {
     const { url } = navState;
 
-    // Intercept the success redirect
     if (url.includes("/mobile-payment/success")) {
       const urlParams = new URLSearchParams(url.split("?")[1]);
       const orderId = urlParams.get("orderId");
@@ -110,15 +114,13 @@ export default function PaymentForm() {
       setShowWebView(false);
       setPaymentUrl(null);
 
-      // Clear mobile state
       resetCheckout();
       resetSteps();
+      clearCart(userId);
 
-      // Navigate to native success screen
       router.replace(`/order-success?orderId=${orderId}` as never);
     }
 
-    // Intercept the failure redirect
     if (url.includes("/mobile-payment/failed")) {
       const urlParams = new URLSearchParams(url.split("?")[1]);
       const reason = urlParams.get("reason") || "Payment failed or was cancelled";
@@ -126,7 +128,9 @@ export default function PaymentForm() {
       setShowWebView(false);
       setPaymentUrl(null);
 
-      Toast.show({ type: "error", text1: decodeURIComponent(reason) });
+      router.replace(
+        `/order-failed?reason=${encodeURIComponent(reason)}` as never
+      );
     }
   };
 
@@ -199,7 +203,6 @@ export default function PaymentForm() {
         )}
       </Pressable>
 
-      {/* WebView Modal for secure payment */}
       <Modal
         visible={showWebView}
         animationType="slide"
