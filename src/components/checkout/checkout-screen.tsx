@@ -18,10 +18,10 @@ import ShippingForm from "./shipping-form";
 import BillingForm from "./billing-form";
 import Shipping from "./shipping";
 import OrderSummary from "./order-summary";
+import PaymentForm from "./payment-form";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useCheckoutStepStore } from "@/store/checkout-step-store";
-import { useAuthStore, AuthUser } from "@/store/auth-store"; // <-- Import AuthUser
-import PaymentForm from "./payment-form";
+import { useAuthStore, AuthUser } from "@/store/auth-store";
 
 const CheckoutScreen = () => {
   const router = useRouter();
@@ -52,7 +52,6 @@ const CheckoutScreen = () => {
   }, [dataSource, initializeWithUserData, hasInitialized]);
 
   const formData = useMemo(() => {
-    // Type assertion here to tell TS that dataSource has these properties
     const userData = dataSource as AuthUser;
 
     const shippingData = shippingAddress?.firstName
@@ -339,15 +338,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     textTransform: "uppercase",
     color: "#FFFFFF",
-  },
-
-  paymentPlaceholder: {
-    padding: 40,
-    alignItems: "center",
-  },
-  paymentPlaceholderText: {
-    fontSize: 14,
-    color: "#A8A29E",
   },
 });
 
