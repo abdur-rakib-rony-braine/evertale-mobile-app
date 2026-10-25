@@ -2,7 +2,9 @@ import { Home, Heart, ShoppingBag, User } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import Toast from "react-native-toast-message";
 
+import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
 
@@ -20,10 +22,13 @@ const LABELS = {
   account: "Account",
 };
 
+const AUTH_REQUIRED = ["cart"];
+
 export default function CustomTabBar({ state }: any) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
+  const userId = useAuthStore((s) => s.user?._id ?? null);
   const cartTotal = useCartStore((s) => s.totalItems);
   const wishlistCount = useWishlistStore((s) => s.count);
 
@@ -37,15 +42,24 @@ export default function CustomTabBar({ state }: any) {
         if (!Icon) return null;
 
         const onPress = () => {
+          if (AUTH_REQUIRED.includes(route.name) && !userId) {
+            Toast.show({ type: "error", text1: "Please log in to continue" });
+            router.push("/account" as never);
+            return;
+          }
+
           if (!isFocused) {
             const href = route.name === "index" ? "/" : `/${route.name}`;
             router.navigate(href as never);
           }
         };
 
-        const badgeCount = 
-          route.name === "cart" ? cartTotal : 
-          route.name === "wishlist" ? wishlistCount : 0;
+        const badgeCount =
+          route.name === "cart"
+            ? cartTotal
+            : route.name === "wishlist"
+            ? wishlistCount
+            : 0;
 
         return (
           <Pressable key={route.key} onPress={onPress} style={styles.tabItem}>

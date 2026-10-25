@@ -50,7 +50,7 @@ export default function RootLayout() {
           {splashVisible && (
             <AnimatedSplashOverlay onFinish={() => setSplashVisible(false)} />
           )}
-          <Toast config={toastConfig} position="bottom" />
+          <Toast config={toastConfig} position="top" />
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
