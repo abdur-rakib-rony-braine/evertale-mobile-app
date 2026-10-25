@@ -1,6 +1,5 @@
 import { urls } from "@/constants/url";
 
-
 export interface ProductColor {
   name: string;
   url: string;
@@ -9,6 +8,39 @@ export interface ProductColor {
 export interface ProductSize {
   name: string;
   stockQuantity: number;
+}
+
+export interface ProductReview {
+  _id?: string;
+  userId?: string;
+  userName?: string;
+  userEmail?: string;
+  userAvatar?: string;
+  comment?: string;
+  reviewTitle?: string;
+  rating: number;
+  images?: string[];
+  likes?: { userId: string }[];
+  dislikes?: { userId: string }[];
+  createdAt?: string;
+  approved?: boolean;
+}
+
+export interface SizeChartMeasurementSize {
+  size: string;
+  start: string;
+  end?: string;
+}
+
+export interface SizeChartMeasurement {
+  measurementName: string;
+  sizes: SizeChartMeasurementSize[];
+}
+
+export interface ProductSizeChart {
+  sizes?: string[];
+  measurements?: SizeChartMeasurement[];
+  images?: string[];
 }
 
 export interface Product {
@@ -33,10 +65,17 @@ export interface Product {
   promovideos?: string[];
   barcode?: string;
   rating?: number;
+  reviews?: ProductReview[];
   new_arrival?: boolean;
   best_sellers?: boolean;
   collections?: string[];
+  pointofsale?: boolean;
+  onlinestore?: boolean;
   countInStock?: number;
+  costPerItem?: number;
+  profit?: number;
+  profitMargin?: number;
+  sizeChart?: ProductSizeChart | string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -105,12 +144,14 @@ export async function fetchProductByHandle(
   handle: string
 ): Promise<Product | null> {
   const res = await fetch(
-    `${urls.api.base}/api/product/${encodeURIComponent(handle)}`,
+    `${urls.api.base}/api/product-details/${encodeURIComponent(handle)}`,
     {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     }
   );
+
+  console.log('res', res)
 
   if (!res.ok) return null;
 

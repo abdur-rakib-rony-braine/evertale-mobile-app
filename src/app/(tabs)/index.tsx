@@ -13,6 +13,7 @@ import KidProductSection from "@/components/others/kid-product-section";
 import ReviewsSection from "@/components/others/reviews";
 import EmailSubscription from "@/components/others/email-subscription";
 import InstagramFollowSection from "@/components/others/instagram-follow";
+import BestSellers from "@/components/comps/best-sellers";
 
 export default function HomeScreen() {
   return (
@@ -28,6 +29,7 @@ export default function HomeScreen() {
         <PromotionalBanner />
         <CategorySection />
         <NewArrivals />
+        <BestSellers />
         <WomenProductSection />
         <KidProductSection />
         <CollectionsSection />
