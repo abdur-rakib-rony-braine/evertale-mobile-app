@@ -1,0 +1,34 @@
+## For Local Build
+
+$env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-17.0.20.101-hotspot"
+$env:Path="$env:JAVA_HOME\bin;$env:Path"
+$env:ANDROID_HOME="D:\Android\Sdk"
+$env:ANDROID_SDK_ROOT="D:\Android\Sdk"
+$env:NODE_ENV="production"
+cd D:\code\evertale-mobile
+java -version
+Test-Path .\node_modules
+Select-String -Path .\.env -Pattern "NODE_ENV"
+Get-CimInstance Win32_OperatingSystem | Select-Object @{n="FreeGB";e={[math]::Round($_.FreePhysicalMemory/1MB,1)}}
+
+
+npx expo prebuild --clean --platform android
+Set-Content -Path android\local.properties -Value "sdk.dir=D\:\\Android\\Sdk" -Encoding ASCII
+cd android
+
+cd android
+./gradlew --stop
+./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a --no-daemon --console=plain "-Dorg.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=768m" "-Dkotlin.daemon.jvm.options=-Xmx1g"
+
+
+After changes then rebuild the APK
+Save your CSS changes, close VS Code and Chrome, open a standalone PowerShell, and run:
+
+$env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-17.0.20.101-hotspot"
+$env:Path="$env:JAVA_HOME\bin;$env:Path"
+$env:ANDROID_HOME="D:\Android\Sdk"
+$env:ANDROID_SDK_ROOT="D:\Android\Sdk"
+$env:APP_VARIANT="testing"
+$env:NODE_ENV="production"
+cd D:\code\evertale-mobile\android
+./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a --no-daemon --console=plain "-Dorg.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=768m" "-Dkotlin.daemon.jvm.options=-Xmx1g"
