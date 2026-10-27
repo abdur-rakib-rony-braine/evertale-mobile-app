@@ -1,8 +1,7 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
-  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -12,6 +11,7 @@ import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native";
+import { Image } from "expo-image";
 import { ChevronLeft, ChevronRight, Play, X } from "lucide-react-native";
 import { productToWishlistItem } from "@/lib/wishlist-item";
 import type { Product } from "@/lib/api/products";
@@ -44,6 +44,12 @@ const ProductMediaGrid = ({
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const lightboxListRef = useRef<FlatList<string>>(null);
 
+  useEffect(() => {
+    if (media?.[0]) {
+      Image.prefetch(media[0], "memory-disk");
+    }
+  }, [media]);
+
   const handleMomentumEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const index = Math.round(e.nativeEvent.contentOffset.x / SLIDE_WIDTH);
     if (index !== activeIndex) setActiveIndex(index);
@@ -74,7 +80,13 @@ const ProductMediaGrid = ({
           style={[styles.slide, { height: SLIDE_HEIGHT }]}
         >
           {uri ? (
-            <Image source={{ uri }} style={styles.slideImage} resizeMode="cover" />
+            <Image
+              source={{ uri }}
+              style={styles.slideImage}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+              transition={150}
+            />
           ) : (
             <View style={styles.slidePlaceholder} />
           )}
@@ -110,6 +122,15 @@ const ProductMediaGrid = ({
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={handleMomentumEnd}
         renderItem={({ item, index }) => renderMedia(item, index)}
+        windowSize={3}
+        initialNumToRender={1}
+        maxToRenderPerBatch={2}
+        removeClippedSubviews
+        getItemLayout={(_, index) => ({
+          length: SLIDE_WIDTH,
+          offset: SLIDE_WIDTH * index,
+          index,
+        })}
       />
 
       {media.length > 1 ? (
@@ -144,6 +165,9 @@ const ProductMediaGrid = ({
                 offset: SCREEN_WIDTH * index,
                 index,
               })}
+              windowSize={3}
+              initialNumToRender={1}
+              maxToRenderPerBatch={2}
               onMomentumScrollEnd={(e) => {
                 const idx = Math.round(
                   e.nativeEvent.contentOffset.x / SCREEN_WIDTH
@@ -167,7 +191,9 @@ const ProductMediaGrid = ({
                       <Image
                         source={{ uri }}
                         style={styles.lightboxImage}
-                        resizeMode="contain"
+                        contentFit="contain"
+                        cachePolicy="memory-disk"
+                        transition={150}
                       />
                     ) : null}
                   </ScrollView>

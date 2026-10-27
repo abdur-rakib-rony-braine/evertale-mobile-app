@@ -1,43 +1,70 @@
 import { StyleSheet, Text, View, Pressable, Linking } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ExternalLink } from "lucide-react-native";
+
+import { formatCurrency } from "@/lib/format";
 
 interface ShippingInfoProps {
   orderData: any;
 }
 
-const InfoRow = ({ label, value }: { label: string; value: any }) => (
-  <View style={styles.infoRow}>
+const InfoRow = ({
+  label,
+  value,
+  fullWidth,
+}: {
+  label: string;
+  value: any;
+  fullWidth?: boolean;
+}) => (
+  <View style={[styles.infoRow, fullWidth && styles.infoRowFull]}>
     <Text style={styles.infoLabel}>{label}</Text>
     <View style={styles.infoValueContainer}>{value}</View>
   </View>
 );
 
 export default function ShippingInfo({ orderData }: ShippingInfoProps) {
+  const insets = useSafeAreaInsets();
+
   if (!orderData) return null;
 
   const { trackingInfo, shipping, deliveryStatus, deliveryInstructions } =
     orderData;
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: Math.max(insets.top, 0) + 8 },
+      ]}
+    >
       <View style={styles.row}>
         <InfoRow
           label="Status"
-          value={<Text style={styles.infoText}>{deliveryStatus || "Pending"}</Text>}
+          value={
+            <Text style={styles.infoText} numberOfLines={2}>
+              {deliveryStatus || "Pending"}
+            </Text>
+          }
         />
         <InfoRow
           label="Method"
-          value={<Text style={styles.infoText}>{shipping?.method || "Standard"}</Text>}
+          value={
+            <Text style={styles.infoText} numberOfLines={2}>
+              {shipping?.method || "Standard"}
+            </Text>
+          }
         />
       </View>
 
       {trackingInfo && (
         <View style={styles.trackingBox}>
           <InfoRow
+            fullWidth
             label="Tracking Information"
             value={
-              <Text style={styles.infoText}>
-                <Text style={{ fontWeight: "500", color: "#292524" }}>
+              <Text style={styles.infoText} numberOfLines={2}>
+                <Text style={styles.infoStrong}>
                   {trackingInfo.carrier}:
                 </Text>{" "}
                 {trackingInfo.trackingNumber}
@@ -47,7 +74,8 @@ export default function ShippingInfo({ orderData }: ShippingInfoProps) {
 
           {trackingInfo.shipping?.cost > 0 && (
             <Text style={styles.costText}>
-              Shipping cost: ${trackingInfo.shipping.cost} ({trackingInfo.shipping.paidBy})
+              Shipping cost: {formatCurrency(trackingInfo.shipping.cost)} (
+              {trackingInfo.shipping.paidBy})
             </Text>
           )}
 
@@ -58,6 +86,8 @@ export default function ShippingInfo({ orderData }: ShippingInfoProps) {
                 `https://auspost.com.au/track/track.html?id=${trackingInfo.trackingNumber}`
               )
             }
+            accessibilityRole="link"
+            accessibilityLabel="Track shipment"
           >
             <ExternalLink size={12} color="#292524" />
             <Text style={styles.trackBtnText}>TRACK</Text>
@@ -65,12 +95,13 @@ export default function ShippingInfo({ orderData }: ShippingInfoProps) {
         </View>
       )}
 
-      {deliveryInstructions && (
+      {deliveryInstructions ? (
         <InfoRow
+          fullWidth
           label="Delivery Instructions"
           value={<Text style={styles.infoText}>{deliveryInstructions}</Text>}
         />
-      )}
+      ) : null}
     </View>
   );
 }
@@ -82,10 +113,17 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     gap: 16,
+    flexWrap: "wrap",
   },
   infoRow: {
-    flex: 1,
+    flexGrow: 1,
+    flexBasis: "45%",
+    minWidth: 120,
     gap: 4,
+  },
+  infoRowFull: {
+    flexBasis: "100%",
+    minWidth: "100%",
   },
   infoLabel: {
     fontSize: 10,
@@ -96,11 +134,17 @@ const styles = StyleSheet.create({
   },
   infoValueContainer: {
     flexDirection: "row",
+    flexShrink: 1,
   },
   infoText: {
     fontSize: 14,
     color: "#44403C",
     lineHeight: 20,
+    flexShrink: 1,
+  },
+  infoStrong: {
+    fontWeight: "500",
+    color: "#292524",
   },
   trackingBox: {
     borderWidth: 1,

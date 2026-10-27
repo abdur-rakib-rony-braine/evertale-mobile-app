@@ -22,11 +22,14 @@ import PaymentForm from "./payment-form";
 import { useCheckoutStore } from "@/store/checkout-store";
 import { useCheckoutStepStore } from "@/store/checkout-step-store";
 import { useAuthStore, AuthUser } from "@/store/auth-store";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Topbar from "../comps/topbar";
+import HeaderBar from "../comps/header-bar";
 
 const CheckoutScreen = () => {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-  
+
   const [hasInitialized, setHasInitialized] = useState(false);
 
   const { currentStep, goToNextStep, goToPreviousStep, markStepComplete, resetSteps } =
@@ -57,7 +60,7 @@ const CheckoutScreen = () => {
     const shippingData = shippingAddress?.firstName
       ? shippingAddress
       : userData
-      ? {
+        ? {
           firstName: userData?.firstName || "",
           lastName: userData?.lastName || "",
           email: userData?.email || "",
@@ -68,7 +71,7 @@ const CheckoutScreen = () => {
           state: userData?.state || "",
           postcode: userData?.postcode || "",
         }
-      : {};
+        : {};
 
     const billingData = billingAddress?.firstName ? billingAddress : shippingData;
 
@@ -181,66 +184,71 @@ const CheckoutScreen = () => {
       style={styles.flex}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.eyebrow}>Express</Text>
-          <Text style={styles.title}>Checkout</Text>
-          <Text style={styles.subtitle}>Pay instantly</Text>
-        </View>
+      <SafeAreaView edges={["top", "bottom"]} style={styles.flex}>
+        <Topbar />
+        <HeaderBar />
 
-        {/* Order Summary (top on mobile) */}
-        <View style={styles.summaryWrapper}>
-          <OrderSummary />
-        </View>
-
-        {/* Checkout Steps */}
-        <View style={styles.content}>
-          <View style={styles.stepperWrapper}>
-            <CheckoutStepper />
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.eyebrow}>Express</Text>
+            <Text style={styles.title}>Checkout</Text>
+            <Text style={styles.subtitle}>Pay instantly</Text>
           </View>
 
-          <View style={styles.stepContent}>
-            {stepContent[currentStep as keyof typeof stepContent]}
+          {/* Order Summary (top on mobile) */}
+          <View style={styles.summaryWrapper}>
+            <OrderSummary />
           </View>
 
-          {/* Footer Nav */}
-          <View style={styles.footer}>
-            <Pressable
-              onPress={currentStep === 1 ? handleCancel : handlePrevious}
-              style={styles.backBtn}
-            >
-              {currentStep !== 1 && (
-                <ArrowLeft size={14} color="#1C1917" strokeWidth={2} />
-              )}
-              <Text style={styles.backBtnText} numberOfLines={1}>
-                {currentStep === 1 ? "Cancel" : getBackButtonText()}
-              </Text>
-            </Pressable>
+          {/* Checkout Steps */}
+          <View style={styles.content}>
+            <View style={styles.stepperWrapper}>
+              <CheckoutStepper />
+            </View>
 
-            {currentStep < 4 && (
+            <View style={styles.stepContent}>
+              {stepContent[currentStep as keyof typeof stepContent]}
+            </View>
+
+            {/* Footer Nav */}
+            <View style={styles.footer}>
               <Pressable
-                onPress={handleNext}
-                disabled={!canProceedFromStep(currentStep)}
-                style={[
-                  styles.nextBtn,
-                  !canProceedFromStep(currentStep) && styles.nextBtnDisabled,
-                ]}
+                onPress={currentStep === 1 ? handleCancel : handlePrevious}
+                style={styles.backBtn}
               >
-                <Text style={styles.nextBtnText} numberOfLines={1}>
-                  {getNextButtonText()}
+                {currentStep !== 1 && (
+                  <ArrowLeft size={14} color="#1C1917" strokeWidth={2} />
+                )}
+                <Text style={styles.backBtnText} numberOfLines={1}>
+                  {currentStep === 1 ? "Cancel" : getBackButtonText()}
                 </Text>
-                <ArrowRight size={14} color="#FFFFFF" strokeWidth={2} />
               </Pressable>
-            )}
+
+              {currentStep < 4 && (
+                <Pressable
+                  onPress={handleNext}
+                  disabled={!canProceedFromStep(currentStep)}
+                  style={[
+                    styles.nextBtn,
+                    !canProceedFromStep(currentStep) && styles.nextBtnDisabled,
+                  ]}
+                >
+                  <Text style={styles.nextBtnText} numberOfLines={1}>
+                    {getNextButtonText()}
+                  </Text>
+                  <ArrowRight size={14} color="#FFFFFF" strokeWidth={2} />
+                </Pressable>
+              )}
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </SafeAreaView>
     </KeyboardAvoidingView>
   );
 };

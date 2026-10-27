@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -74,11 +74,20 @@ const ShippingForm = ({ initialData, userData }: ShippingFormProps) => {
     useCheckoutStore();
 
   const [showStatePicker, setShowStatePicker] = useState(false);
+  const initialized = useRef(false);
+  const lastErrorKey = useRef("");
 
-  const { control, watch, setValue, formState: { errors }, reset } =
-    useForm<ShippingFormValues>({
-      resolver: zodResolver(shippingSchema),
-      defaultValues: initialData || {
+  const {
+    control,
+    watch,
+    setValue,
+    formState: { errors },
+    reset,
+  } = useForm<ShippingFormValues>({
+    resolver: zodResolver(shippingSchema),
+    defaultValues:
+      initialData ||
+      ({
         shipping: {
           firstName: shippingAddress.firstName || "",
           lastName: shippingAddress.lastName || "",
@@ -90,36 +99,45 @@ const ShippingForm = ({ initialData, userData }: ShippingFormProps) => {
           state: shippingAddress.state || "",
           postcode: shippingAddress.postcode || "",
         },
-      },
-      mode: "onChange",
-    });
+      } as ShippingFormValues),
+    mode: "onChange",
+  });
+
+  useEffect(() => {
+    if (initialized.current) return;
+    if (initialData?.shipping) {
+      reset(initialData as ShippingFormValues);
+    }
+    initialized.current = true;
+  }, [initialData, reset]);
 
   useEffect(() => {
     const subscription = watch((value) => {
       if (value.shipping) {
-        setShippingAddress(value.shipping);
+        setShippingAddress(value.shipping as any);
       }
     });
     return () => subscription.unsubscribe();
   }, [watch, setShippingAddress]);
 
   useEffect(() => {
-    if (errors.shipping && Object.keys(errors.shipping).length > 0) {
-      setFieldErrors(errors);
+    const shippingErrors = (errors.shipping || {}) as Record<string, any>;
+    const hasErrors = Object.keys(shippingErrors).length > 0;
+    const key = hasErrors ? JSON.stringify(Object.keys(shippingErrors).sort()) : "";
+
+    if (key === lastErrorKey.current) return;
+    lastErrorKey.current = key;
+
+    if (hasErrors) {
+      setFieldErrors(errors as any);
     } else {
       clearFieldErrors();
     }
   }, [errors, setFieldErrors, clearFieldErrors]);
 
-  useEffect(() => {
-    if (initialData) reset(initialData);
-  }, [initialData, reset]);
-
-  const inputCls = (fieldName: keyof NonNullable<ShippingFormValues["shipping"]>) =>
-    [
-      styles.input,
-      errors.shipping?.[fieldName] ? styles.inputError : null,
-    ];
+  const inputCls = (
+    fieldName: keyof NonNullable<ShippingFormValues["shipping"]>
+  ) => [styles.input, errors.shipping?.[fieldName] ? styles.inputError : null];
 
   const handleAddressSelect = (data: {
     address: string;
@@ -192,7 +210,10 @@ const ShippingForm = ({ initialData, userData }: ShippingFormProps) => {
             name="shipping.email"
             render={({ field }) => (
               <TextInput
-                style={[inputCls("email"), !!userData?.email && styles.inputDisabled]}
+                style={[
+                  inputCls("email"),
+                  !!userData?.email && styles.inputDisabled,
+                ]}
                 value={field.value}
                 onChangeText={field.onChange}
                 editable={!userData?.email}
@@ -234,6 +255,7 @@ const ShippingForm = ({ initialData, userData }: ShippingFormProps) => {
               <AddressFinder
                 defaultValue={field.value}
                 onAddressSelect={handleAddressSelect}
+                showLabel={false}
               />
             </View>
           )}
@@ -276,7 +298,9 @@ const ShippingForm = ({ initialData, userData }: ShippingFormProps) => {
               ]}
             >
               {watch("shipping.state") ||
-                (errors.shipping?.state ? "State is required" : "Select your state")}
+                (errors.shipping?.state
+                  ? "State is required"
+                  : "Select your state")}
             </Text>
             <ChevronDown size={16} color="#78716C" />
           </Pressable>
@@ -353,10 +377,7 @@ const ShippingForm = ({ initialData, userData }: ShippingFormProps) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 24,
-    gap: 20,
-  },
+  container: { padding: 24, gap: 20 },
   stepText: {
     fontSize: 12,
     fontWeight: "600",
@@ -365,23 +386,10 @@ const styles = StyleSheet.create({
     color: "#A8A29E",
     marginBottom: 4,
   },
-  heading: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#292524",
-  },
-  row: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  field: {
-    flex: 1,
-    gap: 6,
-  },
-  labelRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
+  heading: { fontSize: 16, fontWeight: "600", color: "#292524" },
+  row: { flexDirection: "row", gap: 16 },
+  field: { flex: 1, gap: 6 },
+  labelRow: { flexDirection: "row", alignItems: "center" },
   label: {
     fontSize: 12,
     fontWeight: "600",
@@ -389,9 +397,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: "#78716C",
   },
-  labelError: {
-    color: "#F87171",
-  },
+  labelError: { color: "#F87171" },
   optional: {
     fontSize: 12,
     color: "#A8A29E",
@@ -408,26 +414,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#292524",
   },
-  inputError: {
-    borderColor: "#FCA5A5",
-    backgroundColor: "#FEF2F2",
-  },
-  inputDisabled: {
-    backgroundColor: "#FAFAF9",
-    color: "#A8A29E",
-  },
+  inputError: { borderColor: "#FCA5A5", backgroundColor: "#FEF2F2" },
+  inputDisabled: { backgroundColor: "#FAFAF9", color: "#A8A29E" },
   selectTrigger: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  selectText: {
-    fontSize: 14,
-    color: "#292524",
-  },
-  selectPlaceholder: {
-    color: "#A8A29E",
-  },
+  selectText: { fontSize: 14, color: "#292524" },
+  selectPlaceholder: { color: "#A8A29E" },
   dropdown: {
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
@@ -440,22 +435,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#F5F5F4",
   },
-  dropdownItemActive: {
-    backgroundColor: "#FAFAF9",
-  },
-  dropdownText: {
-    fontSize: 14,
-    color: "#57534E",
-  },
-  dropdownTextActive: {
-    color: "#1C1917",
-    fontWeight: "600",
-  },
-  errorText: {
-    fontSize: 12,
-    color: "#F87171",
-    marginTop: 2,
-  },
+  dropdownItemActive: { backgroundColor: "#FAFAF9" },
+  dropdownText: { fontSize: 14, color: "#57534E" },
+  dropdownTextActive: { color: "#1C1917", fontWeight: "600" },
+  errorText: { fontSize: 12, color: "#F87171", marginTop: 2 },
 });
 
 export default ShippingForm;

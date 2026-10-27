@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Product } from "@/lib/api/products";
 import { useCartStore } from "@/store/cart-store";
 import ProductViewCarousel from "./product-view-carousel";
+import SoldOut from "../product/sold-out";
 import { formatCurrency } from "@/lib/format";
 
 interface QuickViewDialogProps {
@@ -87,11 +88,9 @@ export default function QuickViewDialog({
       transparent
       onRequestClose={onClose}
     >
-      <Pressable onPress={onClose} style={styles.backdrop}>
-        <Pressable
-          onPress={(e) => e.stopPropagation()}
-          style={styles.sheet}
-        >
+      <View style={styles.backdrop}>
+        <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
+        <View style={styles.sheet}>
           <View style={styles.closeRow}>
             <Pressable onPress={onClose} hitSlop={10}>
               <X size={20} color="#57534E" />
@@ -100,7 +99,11 @@ export default function QuickViewDialog({
 
           <ScrollView
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: (insets.bottom || 16) + 24 }}
+            keyboardShouldPersistTaps="handled"
+            bounces={false}
+            contentContainerStyle={{
+              paddingBottom: (insets.bottom || 16) + 24,
+            }}
           >
             <ProductViewCarousel images={product.images} />
 
@@ -128,26 +131,29 @@ export default function QuickViewDialog({
                         <Pressable
                           key={i}
                           onPress={() =>
-                            !isOOS && handleSizeSelect(size.name, size.stockQuantity)
+                            handleSizeSelect(size.name, size.stockQuantity)
                           }
                           style={[
                             styles.sizeBtn,
+                            isOOS && !isSelected && styles.sizeBtnOOS,
                             isSelected && styles.sizeBtnSelected,
-                            isOOS && styles.sizeBtnOOS,
                           ]}
                         >
                           <Text
                             style={[
                               styles.sizeText,
+                              isOOS && !isSelected && styles.sizeTextOOS,
                               isSelected && styles.sizeTextSelected,
-                              isOOS && styles.sizeTextOOS,
                             ]}
                           >
                             {size.name}
                           </Text>
                           {isOOS ? (
                             <View style={styles.slashWrap}>
-                              <Slash size={22} color="#E7E5E4" />
+                              <Slash
+                                size={22}
+                                color={isSelected ? "#171717" : "#E7E5E4"}
+                              />
                             </View>
                           ) : null}
                         </Pressable>
@@ -182,14 +188,12 @@ export default function QuickViewDialog({
 
               <View style={styles.actionWrap}>
                 {isSoldOut ? (
-                  <View style={styles.soldOutBtn}>
-                    <Text style={styles.soldOutText}>Sold Out</Text>
-                  </View>
+                  <SoldOut product={product} productSize={selectedSize} />
                 ) : (
                   <>
                     <Pressable
                       onPress={handleAddToCart}
-                      disabled={isAddingToCart || isBuyingNow}
+                      disabled={isAddingToCart || isBuyingNow || !selectedSize}
                       style={styles.addToCartBtn}
                     >
                       {isAddingToCart ? (
@@ -204,7 +208,7 @@ export default function QuickViewDialog({
 
                     <Pressable
                       onPress={handleBuyNow}
-                      disabled={isAddingToCart || isBuyingNow}
+                      disabled={isAddingToCart || isBuyingNow || !selectedSize}
                       style={styles.buyNowBtn}
                     >
                       {isBuyingNow ? (
@@ -231,8 +235,8 @@ export default function QuickViewDialog({
               </View>
             </View>
           </ScrollView>
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }
@@ -311,6 +315,7 @@ const styles = StyleSheet.create({
   sizeBtnSelected: {
     borderWidth: 2,
     borderColor: "#171717",
+    backgroundColor: "#FFFFFF",
   },
   sizeBtnOOS: {
     borderColor: "#F5F5F4",
@@ -322,6 +327,7 @@ const styles = StyleSheet.create({
   },
   sizeTextSelected: {
     color: "#171717",
+    fontWeight: "600",
   },
   sizeTextOOS: {
     color: "#E7E5E4",
@@ -348,21 +354,6 @@ const styles = StyleSheet.create({
   actionWrap: {
     paddingTop: 8,
     gap: 8,
-  },
-  soldOutBtn: {
-    width: "100%",
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#E7E5E4",
-  },
-  soldOutText: {
-    fontSize: 12,
-    fontWeight: "600",
-    letterSpacing: 1,
-    textTransform: "uppercase",
-    color: "#D6D3D1",
   },
   addToCartBtn: {
     width: "100%",

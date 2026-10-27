@@ -1,6 +1,7 @@
 import { urls } from "@/constants/url";
 
 export interface ProductColor {
+  _id: string,
   name: string;
   url: string;
 }

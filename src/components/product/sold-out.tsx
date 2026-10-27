@@ -106,15 +106,12 @@ const SoldOut = ({ product, productSize }: SoldOutProps) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.soldOutButton}>
+      <View style={styles.soldOutBtn}>
         <Text style={styles.soldOutText}>Sold Out</Text>
       </View>
 
-      <Pressable
-        onPress={() => setIsOpen(true)}
-        style={styles.notifyButton}
-      >
-        <Text style={styles.notifyButtonText}>NOTIFY ME</Text>
+      <Pressable onPress={() => setIsOpen(true)} style={styles.notifyBtn}>
+        <Text style={styles.notifyBtnText}>Notify Me</Text>
       </Pressable>
 
       <Modal
@@ -138,31 +135,35 @@ const SoldOut = ({ product, productSize }: SoldOutProps) => {
               style={styles.closeButton}
               accessibilityLabel="Close"
             >
-              <X size={20} color="#1C1917" />
+              <X size={20} color="#57534E" />
             </Pressable>
           </View>
 
           <ScrollView
             contentContainerStyle={styles.modalBody}
             keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
-            <Text style={styles.label}>Size</Text>
-            <View style={styles.sizeRow}>
+            <Text style={styles.sectionLabel}>Size</Text>
+            <View style={styles.sizeGrid}>
               {unavailableSize.map((item, i) => {
                 const active = selectedSize === item?.name;
+                const isOOS = item?.stockQuantity === 0;
                 return (
                   <Pressable
                     key={`${item?.name}-${i}`}
                     onPress={() => setSelectedSize(item.name)}
                     style={[
-                      styles.sizeChip,
-                      active && styles.sizeChipActive,
+                      styles.sizeBtn,
+                      isOOS && !active && styles.sizeBtnOOS,
+                      active && styles.sizeBtnSelected,
                     ]}
                   >
                     <Text
                       style={[
-                        styles.sizeChipText,
-                        active && styles.sizeChipTextActive,
+                        styles.sizeText,
+                        isOOS && !active && styles.sizeTextOOS,
+                        active && styles.sizeTextSelected,
                       ]}
                     >
                       {item?.name}
@@ -172,7 +173,7 @@ const SoldOut = ({ product, productSize }: SoldOutProps) => {
               })}
             </View>
 
-            <Text style={styles.label}>Name *</Text>
+            <Text style={styles.sectionLabel}>Name *</Text>
             <TextInput
               value={name}
               onChangeText={setName}
@@ -185,7 +186,7 @@ const SoldOut = ({ product, productSize }: SoldOutProps) => {
               ]}
             />
 
-            <Text style={styles.label}>Email *</Text>
+            <Text style={styles.sectionLabel}>Email *</Text>
             <TextInput
               value={email}
               onChangeText={setEmail}
@@ -200,14 +201,12 @@ const SoldOut = ({ product, productSize }: SoldOutProps) => {
             <Pressable
               onPress={handleNotifyMe}
               disabled={loading}
-              style={[styles.submitButton, loading && styles.submitDisabled]}
+              style={[styles.submitBtn, loading && styles.submitDisabled]}
             >
               {loading ? (
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
-                <Text style={styles.submitButtonText}>
-                  Notify me when available
-                </Text>
+                <Text style={styles.btnText}>Notify me when available</Text>
               )}
             </Pressable>
 
@@ -227,36 +226,43 @@ const SoldOut = ({ product, productSize }: SoldOutProps) => {
 
 const styles = StyleSheet.create({
   container: {
-    gap: 12,
+    gap: 8,
   },
-  soldOutButton: {
+  soldOutBtn: {
     width: "100%",
-    borderWidth: 1,
-    borderColor: "#DC2626",
-    paddingVertical: 24,
+    height: 44,
     alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E7E5E4",
+    backgroundColor: "#F8F5F1",
   },
   soldOutText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "600",
-    color: "#DC2626",
+    letterSpacing: 1,
+    textTransform: "uppercase",
+    color: "#D6D3D1",
   },
-  notifyButton: {
+  notifyBtn: {
     width: "100%",
-    backgroundColor: "#000000",
-    paddingVertical: 12,
+    height: 44,
+    backgroundColor: "#171717",
     alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
   },
-  notifyButtonText: {
+  notifyBtnText: {
     color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "500",
-    letterSpacing: 0.5,
+    fontSize: 12,
+    fontWeight: "600",
+    letterSpacing: 1.44,
+    textTransform: "uppercase",
   },
 
   modalContainer: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F8F5F1",
   },
   modalHeader: {
     flexDirection: "row",
@@ -272,8 +278,9 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: "600",
-    color: "#1C1917",
+    fontWeight: "500",
+    color: "#292524",
+    lineHeight: 24,
     textTransform: "capitalize",
   },
   modalDescription: {
@@ -291,72 +298,85 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
     gap: 8,
   },
-  label: {
+  sectionLabel: {
     fontSize: 12,
     fontWeight: "600",
-    letterSpacing: 1.2,
+    letterSpacing: 1.44,
     textTransform: "uppercase",
-    color: "#78716C",
+    color: "#A8A29E",
     marginTop: 8,
   },
-  sizeRow: {
+  sizeGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
   },
-  sizeChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+  sizeBtn: {
     borderWidth: 1,
-    borderColor: "#D6D3D1",
-    backgroundColor: "#F9FAFB",
-  },
-  sizeChipActive: {
-    borderWidth: 2,
-    borderColor: "#1C1917",
+    borderColor: "#E7E5E4",
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    position: "relative",
     backgroundColor: "#FFFFFF",
   },
-  sizeChipText: {
+  sizeBtnSelected: {
+    borderWidth: 2,
+    borderColor: "#171717",
+    backgroundColor: "#FFFFFF",
+  },
+  sizeBtnOOS: {
+    borderColor: "#F5F5F4",
+  },
+  sizeText: {
     fontSize: 12,
     fontWeight: "500",
-    color: "#57534E",
+    color: "#78716C",
   },
-  sizeChipTextActive: {
-    color: "#1C1917",
+  sizeTextSelected: {
+    color: "#171717",
+    fontWeight: "600",
+  },
+  sizeTextOOS: {
+    color: "#E7E5E4",
   },
 
   input: {
     borderWidth: 1,
-    borderColor: "#D1D5DB",
-    backgroundColor: "#F9FAFB",
+    borderColor: "#E7E5E4",
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 14,
-    paddingVertical: 14,
+    paddingVertical: 12,
     fontSize: 14,
-    color: "#1C1917",
+    color: "#171717",
   },
   inputDisabled: {
     opacity: 0.6,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: "#F5F5F4",
   },
 
-  submitButton: {
+  submitBtn: {
+    width: "100%",
+    height: 44,
     marginTop: 16,
     backgroundColor: "#AE7857",
-    paddingVertical: 16,
     alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
   },
   submitDisabled: {
     opacity: 0.6,
   },
-  submitButtonText: {
+  btnText: {
     color: "#FFFFFF",
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "600",
+    letterSpacing: 1.44,
+    textTransform: "uppercase",
   },
 
   successBox: {
     marginTop: 8,
-    backgroundColor: "rgba(27,149,0,0.24)",
+    backgroundColor: "rgba(27,149,0,0.12)",
     paddingVertical: 16,
     alignItems: "center",
   },

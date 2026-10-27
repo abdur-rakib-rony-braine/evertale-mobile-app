@@ -4,6 +4,7 @@ import { View, StyleSheet, Text, TextInput, Pressable, ActivityIndicator } from 
 interface AddressFinderProps {
   onAddressSelect: (data: { address: string; suburb: string; state: string; postcode: string }) => void;
   defaultValue?: string;
+  showLabel?: boolean
 }
 
 interface Prediction {
@@ -13,7 +14,7 @@ interface Prediction {
 
 const API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
-export default function AddressFinder({ onAddressSelect, defaultValue }: AddressFinderProps) {
+export default function AddressFinder({ onAddressSelect, defaultValue, showLabel = true }: AddressFinderProps) {
   const [query, setQuery] = useState(defaultValue || "");
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [loading, setLoading] = useState(false);
@@ -97,7 +98,7 @@ export default function AddressFinder({ onAddressSelect, defaultValue }: Address
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Address</Text>
+      {showLabel && <Text style={styles.label}>Address</Text>}
       <View>
         <TextInput
           style={styles.input}

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -49,7 +49,10 @@ const billingSchema = z
       "postcode",
     ];
     for (const field of required) {
-      if (!b[field as keyof typeof b] || b[field as keyof typeof b]?.trim() === "") {
+      if (
+        !b[field as keyof typeof b] ||
+        b[field as keyof typeof b]?.trim() === ""
+      ) {
         ctx.addIssue({
           path: ["billing", field],
           message: `${field.replace(/([A-Z])/g, " $1")} is required`,
@@ -132,6 +135,9 @@ const BillingForm = ({ initialData }: any) => {
 
   const [showStatePicker, setShowStatePicker] = useState(false);
 
+  const initialized = useRef(false);
+  const lastErrorKey = useRef("");
+
   const {
     control,
     watch,
@@ -163,44 +169,59 @@ const BillingForm = ({ initialData }: any) => {
     debouncedSetBillingAddress(billingValues);
   }, [sameAsShipping, billingValues, debouncedSetBillingAddress]);
 
-  useEffect(() => () => debouncedSetBillingAddress.cancel(), [debouncedSetBillingAddress]);
+  useEffect(
+    () => () => debouncedSetBillingAddress.cancel(),
+    [debouncedSetBillingAddress]
+  );
 
   useEffect(() => {
-    if (Object.keys(errors).length > 0) setFieldErrors(errors);
+    const hasErrors = Object.keys(errors).length > 0;
+    const key = hasErrors ? JSON.stringify(Object.keys(errors).sort()) : "";
+
+    if (key === lastErrorKey.current) return;
+    lastErrorKey.current = key;
+
+    if (hasErrors) setFieldErrors(errors);
     else clearFieldErrors();
   }, [errors, setFieldErrors, clearFieldErrors]);
 
   useEffect(() => {
+    if (initialized.current) return;
     if (initialData) {
       reset({
         sameAsShipping: initialData.sameAsShipping ?? storeSame ?? true,
         billing: initialData.billing ?? {},
       });
     }
+    initialized.current = true;
   }, [initialData, reset, storeSame]);
 
-  useEffect(() => {
-    if (
-      !sameAsShipping &&
-      shippingAddress &&
-      (!billingValues?.firstName || billingValues.firstName === "")
-    ) {
-      Object.entries({
-        firstName: shippingAddress.firstName || "",
-        lastName: shippingAddress.lastName || "",
-        email: shippingAddress.email || "",
-        phone: shippingAddress.phone || "",
-        address: shippingAddress.address || "",
-        address2: shippingAddress.address2 || "",
-        suburb: shippingAddress.suburb || "",
-        state: shippingAddress.state || "",
-        postcode: shippingAddress.postcode || "",
-        companyLabel: billingValues?.companyLabel || "",
-      }).forEach(([key, value]) =>
-        setValue(`billing.${key}` as any, value, { shouldValidate: false })
-      );
-    }
-  }, [sameAsShipping, shippingAddress, setValue, billingValues]);
+  const prefillFromShipping = () => {
+    if (!shippingAddress) return;
+    Object.entries({
+      firstName: shippingAddress.firstName || "",
+      lastName: shippingAddress.lastName || "",
+      email: shippingAddress.email || "",
+      phone: shippingAddress.phone || "",
+      address: shippingAddress.address || "",
+      address2: shippingAddress.address2 || "",
+      suburb: shippingAddress.suburb || "",
+      state: shippingAddress.state || "",
+      postcode: shippingAddress.postcode || "",
+      companyLabel: billingValues?.companyLabel || "",
+    }).forEach(([key, value]) =>
+      setValue(`billing.${key}` as any, value, { shouldValidate: false })
+    );
+  };
+
+  const handleSameAsShipping = () => {
+    setValue("sameAsShipping", true, { shouldValidate: true });
+  };
+
+  const handleDifferentAddress = () => {
+    setValue("sameAsShipping", false, { shouldValidate: true });
+    prefillFromShipping();
+  };
 
   const inputCls = (fieldName: string) => [
     styles.input,
@@ -226,17 +247,13 @@ const BillingForm = ({ initialData }: any) => {
       </View>
 
       <View style={styles.radioGroup}>
-        <Pressable
-          style={styles.radioRow}
-          onPress={() => setValue("sameAsShipping", true, { shouldValidate: true })}
-        >
+        <Pressable style={styles.radioRow} onPress={handleSameAsShipping}>
           <View
-            style={[
-              styles.checkbox,
-              sameAsShipping && styles.checkboxActive,
-            ]}
+            style={[styles.checkbox, sameAsShipping && styles.checkboxActive]}
           >
-            {sameAsShipping && <Check size={10} color="#FFFFFF" strokeWidth={3} />}
+            {sameAsShipping && (
+              <Check size={10} color="#FFFFFF" strokeWidth={3} />
+            )}
           </View>
           <Text
             style={[
@@ -248,17 +265,13 @@ const BillingForm = ({ initialData }: any) => {
           </Text>
         </Pressable>
 
-        <Pressable
-          style={styles.radioRow}
-          onPress={() => setValue("sameAsShipping", false, { shouldValidate: true })}
-        >
+        <Pressable style={styles.radioRow} onPress={handleDifferentAddress}>
           <View
-            style={[
-              styles.checkbox,
-              !sameAsShipping && styles.checkboxActive,
-            ]}
+            style={[styles.checkbox, !sameAsShipping && styles.checkboxActive]}
           >
-            {!sameAsShipping && <Check size={10} color="#FFFFFF" strokeWidth={3} />}
+            {!sameAsShipping && (
+              <Check size={10} color="#FFFFFF" strokeWidth={3} />
+            )}
           </View>
           <Text
             style={[
@@ -275,7 +288,9 @@ const BillingForm = ({ initialData }: any) => {
         <View style={styles.formBlock}>
           <View style={styles.row}>
             <View style={styles.field}>
-              <FormLabel hasError={!!errors.billing?.firstName}>First Name *</FormLabel>
+              <FormLabel hasError={!!errors.billing?.firstName}>
+                First Name *
+              </FormLabel>
               <Controller
                 control={control}
                 name="billing.firstName"
@@ -292,7 +307,9 @@ const BillingForm = ({ initialData }: any) => {
             </View>
 
             <View style={styles.field}>
-              <FormLabel hasError={!!errors.billing?.lastName}>Last Name *</FormLabel>
+              <FormLabel hasError={!!errors.billing?.lastName}>
+                Last Name *
+              </FormLabel>
               <Controller
                 control={control}
                 name="billing.lastName"
@@ -477,7 +494,9 @@ const BillingForm = ({ initialData }: any) => {
 
           <View style={styles.row}>
             <View style={styles.field}>
-              <FormLabel hasError={!!errors.billing?.postcode}>Postcode *</FormLabel>
+              <FormLabel hasError={!!errors.billing?.postcode}>
+                Postcode *
+              </FormLabel>
               <Controller
                 control={control}
                 name="billing.postcode"

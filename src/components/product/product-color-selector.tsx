@@ -1,4 +1,5 @@
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import type { Product } from "@/lib/api/products";
 
@@ -33,16 +34,29 @@ const ProductColorSelector = ({ product }: ProductColorSelectorProps) => {
 
           return (
             <Pressable
-              key={`${item?.name || "color"}-${i}`}
+              key={`${item?._id || item?.name || "color"}-${i}`}
               onPress={() => router.push(buildHref(item?.name) as never)}
-              style={[styles.swatch, active && styles.swatchActive]}
+              style={styles.item}
               accessibilityLabel={item?.name}
             >
-              {uri ? (
-                <Image source={{ uri }} style={styles.swatchImage} />
-              ) : (
-                <View style={styles.swatchFallback} />
-              )}
+              <View style={[styles.swatch, active && styles.swatchActive]}>
+                {uri ? (
+                  <Image
+                    source={{ uri }}
+                    style={styles.swatchImage}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
+                  />
+                ) : (
+                  <View style={styles.swatchFallback} />
+                )}
+              </View>
+              <Text
+                numberOfLines={1}
+                style={[styles.name, active && styles.nameActive]}
+              >
+                {item?.name}
+              </Text>
             </Pressable>
           );
         })}
@@ -69,9 +83,14 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     flexWrap: "wrap",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "center",
-    gap: 10,
+    gap: 12,
+  },
+  item: {
+    alignItems: "center",
+    gap: 6,
+    width: 64,
   },
   swatch: {
     width: 36,
@@ -91,11 +110,24 @@ const styles = StyleSheet.create({
   swatchImage: {
     width: "100%",
     height: "100%",
+    borderRadius: 999,
   },
   swatchFallback: {
     width: "100%",
     height: "100%",
     backgroundColor: "#F5F5F4",
+  },
+  name: {
+    fontSize: 10,
+    fontWeight: "500",
+    color: "#78716C",
+    textAlign: "center",
+    textTransform: "capitalize",
+    maxWidth: 64,
+  },
+  nameActive: {
+    color: "#292524",
+    fontWeight: "600",
   },
 });
 

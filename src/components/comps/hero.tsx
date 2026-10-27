@@ -1,13 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Dimensions,
-  FlatList,
-  Image,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  StyleSheet,
-  View,
-} from "react-native";
+import { useEffect, useState } from "react";
+import { Dimensions, FlatList, StyleSheet, View } from "react-native";
+import { Image } from "expo-image";
 
 const { width, height } = Dimensions.get("window");
 const HERO_HEIGHT = Math.min(height * 0.75, 900);
@@ -26,53 +19,35 @@ interface HeroProps {
 
 export default function Hero({ slides = [] }: HeroProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const listRef = useRef<FlatList<Slide>>(null);
 
   useEffect(() => {
     if (slides.length <= 1) return;
     const interval = setInterval(() => {
-      setActiveIndex((prev) => {
-        const next = (prev + 1) % slides.length;
-        listRef.current?.scrollToIndex({ index: next, animated: true });
-        return next;
-      });
+      setActiveIndex((prev) => (prev + 1) % slides.length);
     }, 5000);
     return () => clearInterval(interval);
   }, [slides.length]);
-
-  const onMomentumScrollEnd = useCallback(
-    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const index = Math.round(e.nativeEvent.contentOffset.x / width);
-      setActiveIndex(index);
-    },
-    []
-  );
 
   if (!slides.length) return null;
 
   return (
     <View style={styles.container}>
       <FlatList
-        ref={listRef}
         data={slides}
         keyExtractor={(item, index) => item._id ?? String(index)}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={onMomentumScrollEnd}
-        getItemLayout={(_, index) => ({
-          length: width,
-          offset: width * index,
-          index,
-        })}
+        onMomentumScrollEnd={(e) =>
+          setActiveIndex(Math.round(e.nativeEvent.contentOffset.x / width))
+        }
         renderItem={({ item }) => (
           <View style={styles.slide}>
             <Image
-              source={{
-                uri: item.fileUrl || "https://placehold.co/1200x1600/png",
-              }}
+              source={{ uri: item.fileUrl || "https://placehold.co/1200x1600/png" }}
               style={styles.image}
-              resizeMode="cover"
+              contentFit="cover"
+              cachePolicy="memory-disk"
             />
           </View>
         )}
@@ -83,10 +58,7 @@ export default function Hero({ slides = [] }: HeroProps) {
           {slides.map((_, i) => (
             <View
               key={i}
-              style={[
-                styles.dot,
-                i === activeIndex ? styles.dotActive : styles.dotInactive,
-              ]}
+              style={[styles.dot, i === activeIndex ? styles.dotActive : styles.dotInactive]}
             />
           ))}
         </View>
@@ -98,10 +70,10 @@ export default function Hero({ slides = [] }: HeroProps) {
 const styles = StyleSheet.create({
   container: {
     height: HERO_HEIGHT,
-    width: width,
+    width,
   },
   slide: {
-    width: width,
+    width,
     height: HERO_HEIGHT,
   },
   image: {
