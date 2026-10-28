@@ -27,6 +27,7 @@ import { useCheckoutStepStore } from "@/store/checkout-step-store";
 import { useDiscountStore } from "@/store/discount-store";
 import { useAuthStore } from "@/store/auth-store";
 import { apiClient } from "@/lib/api/client";
+import { urls } from "@/constants/url";
 
 const PAYMENT_METHODS = [
   { id: "card", label: "Credit / Debit Card", description: "Secure encrypted payment via ANZ" },
@@ -91,7 +92,12 @@ export default function PaymentForm() {
       const sessionId = data.sessionId;
       setOrderId(sessionId);
 
-      const url = `https://evertale.com.au/mobile-payment?sessionId=${sessionId}&method=${selected}`;
+      const ticketRes = await apiClient.post("/api/auth/webview-ticket");
+      const next = `/mobile-payment?sessionId=${sessionId}&method=${selected}`;
+      const url = `${urls.api.base}/api/auth/webview-login?ticket=${encodeURIComponent(
+        ticketRes.data.ticket
+      )}&next=${encodeURIComponent(next)}`;
+
       setPaymentUrl(url);
       setShowWebView(true);
     } catch (error: any) {
