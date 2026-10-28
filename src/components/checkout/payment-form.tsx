@@ -76,6 +76,17 @@ export default function PaymentForm() {
 
     setIsLoading(true);
 
+    console.log('cool pay', {
+        items: cartItems,
+        shippingAddress,
+        billingAddress,
+        shippingMethod: shipping,
+        total: finalTotal,
+        discountApplied: appliedDiscount,
+        notes,
+        deliveryInstructions,
+      })
+
     try {
       const { data } = await apiClient.post("/api/checkout/session", {
         items: cartItems,
