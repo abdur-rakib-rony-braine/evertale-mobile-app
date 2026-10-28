@@ -1,7 +1,9 @@
 import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
 import { XCircle, RefreshCw, ArrowLeft } from "lucide-react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import Topbar from "@/components/comps/topbar";
+import HeaderBar from "@/components/comps/header-bar";
 
 export default function OrderFailed() {
   const router = useRouter();
@@ -12,54 +14,58 @@ export default function OrderFailed() {
   }>();
 
   return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={[
-        styles.container,
-        { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 40 },
-      ]}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.iconCircle}>
-        <XCircle size={56} color="#DC2626" strokeWidth={1.5} />
-      </View>
-
-      <Text style={styles.title}>Payment Failed</Text>
-      <Text style={styles.subtitle}>
-        We couldn't process your payment. Don't worry — no money was taken from
-        your account.
-      </Text>
-
-      {reason ? (
-        <View style={styles.reasonBox}>
-          <Text style={styles.reasonLabel}>Reason</Text>
-          <Text style={styles.reasonValue}>{decodeURIComponent(reason)}</Text>
+    <SafeAreaView edges={["top"]} style={styles.scroll}>
+      <Topbar />
+      <HeaderBar />
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.container,
+          { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 40 },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.iconCircle}>
+          <XCircle size={56} color="#DC2626" strokeWidth={1.5} />
         </View>
-      ) : null}
 
-      <View style={styles.helpBox}>
-        <Text style={styles.helpTitle}>What you can do</Text>
-        <Text style={styles.helpItem}>• Check your card details and try again</Text>
-        <Text style={styles.helpItem}>• Try a different payment method</Text>
-        <Text style={styles.helpItem}>• Contact your bank if the issue persists</Text>
-      </View>
+        <Text style={styles.title}>Payment Failed</Text>
+        <Text style={styles.subtitle}>
+          We couldn't process your payment. Don't worry — no money was taken from
+          your account.
+        </Text>
 
-      <Pressable
-        onPress={() => router.replace("/checkout" as never)}
-        style={styles.primaryBtn}
-      >
-        <RefreshCw size={16} color="#FFFFFF" />
-        <Text style={styles.primaryBtnText}>Try Again</Text>
-      </Pressable>
+        {reason ? (
+          <View style={styles.reasonBox}>
+            <Text style={styles.reasonLabel}>Reason</Text>
+            <Text style={styles.reasonValue}>{decodeURIComponent(reason)}</Text>
+          </View>
+        ) : null}
 
-      <Pressable
-        onPress={() => router.replace("/(tabs)/cart" as never)}
-        style={styles.secondaryBtn}
-      >
-        <ArrowLeft size={16} color="#1C1917" />
-        <Text style={styles.secondaryBtnText}>Back to Cart</Text>
-      </Pressable>
-    </ScrollView>
+        <View style={styles.helpBox}>
+          <Text style={styles.helpTitle}>What you can do</Text>
+          <Text style={styles.helpItem}>• Check your card details and try again</Text>
+          <Text style={styles.helpItem}>• Try a different payment method</Text>
+          <Text style={styles.helpItem}>• Contact your bank if the issue persists</Text>
+        </View>
+
+        <Pressable
+          onPress={() => router.replace("/checkout" as never)}
+          style={styles.primaryBtn}
+        >
+          <RefreshCw size={16} color="#FFFFFF" />
+          <Text style={styles.primaryBtnText}>Try Again</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => router.replace("/(tabs)/cart" as never)}
+          style={styles.secondaryBtn}
+        >
+          <ArrowLeft size={16} color="#1C1917" />
+          <Text style={styles.secondaryBtnText}>Back to Cart</Text>
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

@@ -1,7 +1,9 @@
 import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
 import { CheckCircle2, ShoppingBag } from "lucide-react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import Topbar from "@/components/comps/topbar";
+import HeaderBar from "@/components/comps/header-bar";
 
 export default function OrderSuccess() {
   const router = useRouter();
@@ -9,39 +11,43 @@ export default function OrderSuccess() {
   const { orderId } = useLocalSearchParams<{ orderId?: string }>();
 
   return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={[
-        styles.container,
-        { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 40 },
-      ]}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.iconCircle}>
-        <CheckCircle2 size={56} color="#16A34A" strokeWidth={1.5} />
-      </View>
-
-      <Text style={styles.title}>Order Confirmed</Text>
-      <Text style={styles.subtitle}>
-        Thank you for your purchase! We've received your order and will send
-        a confirmation email shortly.
-      </Text>
-
-      {orderId ? (
-        <View style={styles.orderIdBox}>
-          <Text style={styles.orderIdLabel}>Order Number</Text>
-          <Text style={styles.orderIdValue}>#{orderId}</Text>
-        </View>
-      ) : null}
-
-      <Pressable
-        onPress={() => router.replace("/(tabs)" as never)}
-        style={styles.primaryBtn}
+    <SafeAreaView edges={["top"]} style={styles.scroll}>
+      <Topbar />
+      <HeaderBar />
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.container,
+          { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 40 },
+        ]}
+        showsVerticalScrollIndicator={false}
       >
-        <ShoppingBag size={16} color="#FFFFFF" />
-        <Text style={styles.primaryBtnText}>Continue Shopping</Text>
-      </Pressable>
-    </ScrollView>
+        <View style={styles.iconCircle}>
+          <CheckCircle2 size={56} color="#16A34A" strokeWidth={1.5} />
+        </View>
+
+        <Text style={styles.title}>Order Confirmed</Text>
+        <Text style={styles.subtitle}>
+          Thank you for your purchase! We've received your order and will send
+          a confirmation email shortly.
+        </Text>
+
+        {orderId ? (
+          <View style={styles.orderIdBox}>
+            <Text style={styles.orderIdLabel}>Order Number</Text>
+            <Text style={styles.orderIdValue}>#{orderId}</Text>
+          </View>
+        ) : null}
+
+        <Pressable
+          onPress={() => router.replace("/(tabs)" as never)}
+          style={styles.primaryBtn}
+        >
+          <ShoppingBag size={16} color="#FFFFFF" />
+          <Text style={styles.primaryBtnText}>Continue Shopping</Text>
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

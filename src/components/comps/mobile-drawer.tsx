@@ -1,5 +1,14 @@
 import { useRouter } from "expo-router";
-import { Camera, Globe, LogOut, Play, Plus, X } from "lucide-react-native";
+import {
+  Camera,
+  Globe,
+  Heart,
+  LogOut,
+  Play,
+  Plus,
+  ShoppingBag,
+  X,
+} from "lucide-react-native";
 import { useEffect } from "react";
 import {
   Dimensions,
@@ -22,6 +31,8 @@ import Toast from "react-native-toast-message";
 import { images } from "@/constants/images";
 import { urls } from "@/constants/url";
 import { useAuthStore } from "@/store/auth-store";
+import { useCartStore } from "@/store/cart-store";
+import { useWishlistStore } from "@/store/wishlist-store";
 
 const { width } = Dimensions.get("window");
 const DRAWER_WIDTH = Math.min(width * 0.85, 360);
@@ -56,7 +67,6 @@ const categories = [
 
 const mobileLinks = [
   { title: "My Account", link: "/account" },
-  { title: "Wishlist", link: "/wishlist" },
   { title: "Contact Us", link: "/contact" },
 ];
 
@@ -77,6 +87,8 @@ export default function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
   const router = useRouter();
   const token = useAuthStore((s) => s.token);
   const logout = useAuthStore((s) => s.logout);
+  const cartCount = useCartStore((s) => s.totalItems);
+  const wishlistCount = useWishlistStore((s) => s.count);
   const translateX = useSharedValue(-DRAWER_WIDTH);
 
   useEffect(() => {
@@ -90,8 +102,15 @@ export default function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
     transform: [{ translateX: translateX.value }],
   }));
 
-  const navigate = (link: string) => {
+  const navigate = (link: string, authRequired?: boolean) => {
     onClose();
+
+    if (authRequired && !token) {
+      Toast.show({ type: "error", text1: "Please log in to continue" });
+      router.push("/account" as any);
+      return;
+    }
+
     router.push(link as any);
   };
 
@@ -109,6 +128,23 @@ export default function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
     });
   };
 
+  const quickLinks = [
+    {
+      title: "Cart",
+      link: "/cart",
+      Icon: ShoppingBag,
+      count: token ? cartCount : 0,
+      authRequired: true,
+    },
+    {
+      title: "Wishlist",
+      link: "/wishlist",
+      Icon: Heart,
+      count: wishlistCount,
+      authRequired: false,
+    },
+  ];
+
   return (
     <>
       {visible && (
@@ -123,11 +159,13 @@ export default function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
 
       <Animated.View style={[styles.drawer, drawerStyle]}>
         <View style={styles.header}>
-          <Image
-            source={images.logo}
-            style={{ width: 100, height: 30 }}
-            resizeMode="contain"
-          />
+          <Pressable onPress={() => navigate("/")} hitSlop={8}>
+            <Image
+              source={images.logo}
+              style={{ width: 140, height: 42 }}
+              resizeMode="contain"
+            />
+          </Pressable>
           <Pressable onPress={onClose} hitSlop={10}>
             <X size={20} color="#78716C" />
           </Pressable>
@@ -162,9 +200,30 @@ export default function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
 
             <View style={styles.accountSection}>
               <Text style={styles.accountHeading}>ACCOUNT</Text>
-              {mobileLinks.map((link, i) => (
+
+              {quickLinks.map(({ title, link, Icon, count, authRequired }) => (
                 <Pressable
-                  key={i}
+                  key={title}
+                  onPress={() => navigate(link, authRequired)}
+                  style={styles.categoryRow}
+                >
+                  <View style={styles.categoryRowInner}>
+                    <View style={styles.quickLeft}>
+                      <Icon size={18} color="#44403C" strokeWidth={1.8} />
+                      <Text style={styles.accountLinkText}>{title}</Text>
+                    </View>
+                    {count > 0 && (
+                      <View style={styles.countBadge}>
+                        <Text style={styles.countBadgeText}>{count}</Text>
+                      </View>
+                    )}
+                  </View>
+                </Pressable>
+              ))}
+
+              {mobileLinks.map((link) => (
+                <Pressable
+                  key={link.title}
                   onPress={() => navigate(link.link)}
                   style={styles.categoryRow}
                 >
@@ -254,6 +313,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
+  quickLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
   categoryText: {
     fontSize: 14,
     fontWeight: "600",
@@ -273,6 +337,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     color: "#44403C",
+  },
+  countBadge: {
+    height: 20,
+    minWidth: 20,
+    paddingHorizontal: 6,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 999,
+    backgroundColor: "#AE7857",
+  },
+  countBadgeText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#FFFFFF",
   },
   logoutInner: {
     flexDirection: "row",
