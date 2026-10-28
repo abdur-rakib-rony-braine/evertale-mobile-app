@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -17,6 +16,7 @@ import { useAuthStore } from "@/store/auth-store";
 import { CartItem, useCartStore } from "@/store/cart-store";
 import UpdateCart from "./update-cart";
 import { formatCurrency } from "@/lib/format";
+import { Image } from "expo-image";
 
 export interface AddToCartProduct {
   _id: string;

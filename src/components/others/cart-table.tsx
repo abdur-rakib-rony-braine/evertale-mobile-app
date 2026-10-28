@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -9,7 +8,6 @@ import {
   View,
 } from "react-native";
 import { useRouter } from "expo-router";
-
 import { formatCurrency } from "@/lib/format";
 import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
@@ -20,6 +18,7 @@ import SizeSelector from "./size-selector";
 import UpdateQuantity from "./update-quantity";
 import { cartItemToWishlistItem } from "@/lib/wishlist-item";
 import WishlistButton from "../comps/wishlist-button";
+import { Image } from "expo-image";
 
 const CartTable = () => {
   const router = useRouter();

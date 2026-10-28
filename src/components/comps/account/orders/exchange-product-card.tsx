@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { Check, Slash, X } from "lucide-react-native";
 import { formatCurrency } from "@/lib/format";
 import { useExchangeStore } from "@/store/exchange-store";
+import { Image } from "expo-image";
+import { Slash, X } from "lucide-react-native";
+import { useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function ExchangeProductCard({ product }: { product: any }) {
   const { newProducts, addNewProduct, removeNewProduct } = useExchangeStore();

@@ -1,4 +1,4 @@
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Edit3, Handbag, Truck } from "lucide-react-native";
 import { useRouter } from "expo-router";
 
@@ -8,6 +8,7 @@ import { useAuthStore } from "@/store/auth-store";
 import { useDiscountStore } from "@/store/discount-store";
 import { formatCurrency } from "@/lib/format";
 import DiscountInput from "./discount-input";
+import { Image } from "expo-image";
 
 const getStockStatus = (
   productSize: string,

@@ -1,5 +1,6 @@
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Check } from "lucide-react-native";
+import { Image } from "expo-image";
 
 interface ItemCardProps {
   product: any;

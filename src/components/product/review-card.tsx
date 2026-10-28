@@ -1,9 +1,10 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import type { ProductReview } from "@/lib/api/products";
 import StarRating from "./star-rating";
 import ReviewImageGrid from "./review-image-grid";
 import ReviewReactionButton from "./review-reaction-button";
 import ReviewMessage from "./review-message";
+import { Image } from "expo-image";
 
 interface ReviewCardProps {
   review: ProductReview;

@@ -1,7 +1,7 @@
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
-
 import { images } from "@/constants/images";
+import { Image } from "expo-image";
 
 export default function PassionateSection() {
   const router = useRouter();

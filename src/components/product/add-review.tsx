@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -15,6 +14,7 @@ import Toast from "react-native-toast-message";
 import { apiClient } from "@/lib/api/client";
 import { useAuthStore } from "@/store/auth-store";
 import StarRating from "./star-rating";
+import { Image } from "expo-image";
 
 interface AddReviewProps {
   productId: string;

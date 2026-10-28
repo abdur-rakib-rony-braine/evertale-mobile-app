@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -12,6 +11,7 @@ import { X } from "lucide-react-native";
 import type { ProductReview } from "@/lib/api/products";
 import ReviewImageCarousel from "./review-image-carousel";
 import StarRating from "./star-rating";
+import { Image } from "expo-image";
 
 interface ReviewImageGridProps {
   review: ProductReview;

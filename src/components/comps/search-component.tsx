@@ -4,7 +4,6 @@ import { Search, X } from "lucide-react-native";
 import { useCallback, useRef, useState, type ComponentRef } from "react";
 import {
   ActivityIndicator,
-  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -18,6 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "@/constants/images";
 import { apiClient } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/format";
+import { Image } from "expo-image";
 
 const CATEGORIES = [
   { label: "Women's", href: "/womens", image: images.womenCategory },

@@ -12,7 +12,6 @@ import {
 import { useEffect } from "react";
 import {
   Dimensions,
-  Image,
   Linking,
   Pressable,
   ScrollView,
@@ -33,6 +32,7 @@ import { urls } from "@/constants/url";
 import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
+import { Image } from "expo-image";
 
 const { width } = Dimensions.get("window");
 const DRAWER_WIDTH = Math.min(width * 0.85, 360);

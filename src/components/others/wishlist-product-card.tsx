@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -13,6 +12,7 @@ import { X, Slash } from "lucide-react-native";
 import { WishlistItem } from "@/store/wishlist-store";
 import { formatCurrency } from "@/lib/format";
 import AddToCartButton from "./add-to-cart-button";
+import { Image } from "expo-image";
 
 interface WishlistProductCardProps {
   item: WishlistItem;

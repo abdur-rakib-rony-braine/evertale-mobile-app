@@ -1,5 +1,6 @@
 import { Image } from "expo-image";
 import { Image as ImageIcon } from "lucide-react-native";
+import type { ComponentRef } from "react";
 import { useEffect, useRef, useState } from "react";
 import {
   LayoutChangeEvent,
@@ -27,7 +28,7 @@ interface ProductImagesProps {
 export default function ProductImages({ products }: ProductImagesProps) {
   const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
   const [width, setWidth] = useState(0);
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
   const indexRef = useRef(0);
 
   const count = products?.length || 0;

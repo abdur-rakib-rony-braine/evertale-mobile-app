@@ -1,8 +1,8 @@
+import { Image } from "expo-image";
 import { useCallback, useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
-  Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
   StyleSheet,

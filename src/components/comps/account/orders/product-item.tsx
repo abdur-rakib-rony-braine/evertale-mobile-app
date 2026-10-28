@@ -1,6 +1,6 @@
-import { Image, StyleSheet, Text, View } from "react-native";
-
+import { StyleSheet, Text, View } from "react-native";
 import { formatCurrency } from "@/lib/format";
+import { Image } from "expo-image";
 
 interface ProductItemProps {
   item: any;

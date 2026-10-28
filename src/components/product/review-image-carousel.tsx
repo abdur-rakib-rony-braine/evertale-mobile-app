@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
-  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -11,6 +10,7 @@ import {
   type NativeSyntheticEvent,
 } from "react-native";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
+import { Image } from "expo-image";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const ASPECT = 4 / 5;

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -18,6 +17,7 @@ import { useExchangeStore } from "@/store/exchange-store";
 import { apiClient } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/format";
 import AnzPaymentButton from "@/components/comps/account/orders/anz-payment-button";
+import { Image } from "expo-image";
 
 export default function ExchangeCheckoutScreen() {
   const router = useRouter();

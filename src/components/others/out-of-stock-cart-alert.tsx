@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -10,6 +9,7 @@ import {
 } from "react-native";
 
 import { CartLineItem } from "@/types/cart";
+import { Image } from "expo-image";
 
 interface OutOfStockCartAlertProps {
   unavailableItems: CartLineItem[];

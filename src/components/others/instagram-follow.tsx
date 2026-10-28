@@ -3,7 +3,6 @@ import { Camera } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
-    Image,
     Linking,
     Pressable,
     StyleSheet,
@@ -12,6 +11,7 @@ import {
 } from "react-native";
 
 import { apiClient } from "@/lib/api/client";
+import { Image } from "expo-image";
 
 interface InstagramData {
   title: string;

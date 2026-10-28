@@ -1,12 +1,13 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Eye } from "lucide-react-native";
 import { useState } from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import AddToCartButton from "@/components/others/add-to-cart-button";
 import { Product } from "@/lib/api/products";
 import { formatCurrency } from "@/lib/format";
 import { productToWishlistItem } from "@/lib/wishlist-item";
 import WishlistButton from "./wishlist-button";
+import { Image } from "expo-image";
 
 interface ProductCardProps {
   product: Product;

@@ -1,12 +1,10 @@
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { useState } from "react";
 import {
-  Image,
-  ImageBackground,
   Pressable,
   StyleSheet,
   Text,
-  View,
+  View
 } from "react-native";
 
 interface Collection {

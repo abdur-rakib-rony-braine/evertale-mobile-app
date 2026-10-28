@@ -1,7 +1,7 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { RefreshCw, Truck, Package } from "lucide-react-native";
-
 import { formatCurrency } from "@/lib/format";
+import { Image } from "expo-image";
 
 interface ReturnDetailsProps {
   returnData: any;
