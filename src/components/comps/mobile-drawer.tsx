@@ -26,13 +26,13 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import Toast from "react-native-toast-message";
+import { Image } from "expo-image";
 
 import { images } from "@/constants/images";
 import { urls } from "@/constants/url";
 import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
-import { Image } from "expo-image";
 
 const { width } = Dimensions.get("window");
 const DRAWER_WIDTH = Math.min(width * 0.85, 360);
@@ -88,7 +88,9 @@ export default function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
   const token = useAuthStore((s) => s.token);
   const logout = useAuthStore((s) => s.logout);
   const cartCount = useCartStore((s) => s.totalItems);
-  const wishlistCount = useWishlistStore((s) => s.count);
+  const wishlistCount = useWishlistStore((s) =>
+    token ? s.items.length : s.localWishlist.length
+  );
   const translateX = useSharedValue(-DRAWER_WIDTH);
 
   useEffect(() => {
@@ -163,7 +165,7 @@ export default function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
             <Image
               source={images.logo}
               style={{ width: 140, height: 42 }}
-              resizeMode="contain"
+              contentFit="contain"
             />
           </Pressable>
           <Pressable onPress={onClose} hitSlop={10}>

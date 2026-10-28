@@ -30,7 +30,9 @@ export default function CustomTabBar({ state }: any) {
 
   const userId = useAuthStore((s) => s.user?._id ?? null);
   const cartTotal = useCartStore((s) => s.totalItems);
-  const wishlistCount = useWishlistStore((s) => s.count);
+  const wishlistCount = useWishlistStore((s) =>
+    userId ? s.items.length : s.localWishlist.length
+  );
 
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom || 8 }]}>

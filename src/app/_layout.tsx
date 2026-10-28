@@ -14,6 +14,8 @@ import AnimatedSplashOverlay from "@/components/comps/animated-splash-overlay";
 import Toast from "react-native-toast-message";
 import toastConfig from "@/components/comps/toast-config";
 import { useAuthStore } from "@/store/auth-store";
+import { useCartStore } from "@/store/cart-store";
+import { useWishlistStore } from "@/store/wishlist-store";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,6 +29,7 @@ export default function RootLayout() {
 
   const loadSession = useAuthStore((s) => s.loadSession);
   const isInitialized = useAuthStore((s) => s.isInitialized);
+  const userId = useAuthStore((s) => s.user?._id ?? null);
 
   useEffect(() => {
     if (fontsLoaded) {
@@ -35,6 +38,12 @@ export default function RootLayout() {
       });
     }
   }, [fontsLoaded, loadSession]);
+
+  useEffect(() => {
+    if (!isInitialized) return;
+    useCartStore.getState().onSessionChange(userId);
+    useWishlistStore.getState().onSessionChange(userId);
+  }, [isInitialized, userId]);
 
   if (!fontsLoaded || !isInitialized) {
     return null;
