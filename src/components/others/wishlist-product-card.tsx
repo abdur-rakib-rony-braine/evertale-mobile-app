@@ -8,11 +8,11 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { X, Slash } from "lucide-react-native";
+import { Image } from "expo-image";
 
 import { WishlistItem } from "@/store/wishlist-store";
 import { formatCurrency } from "@/lib/format";
 import AddToCartButton from "./add-to-cart-button";
-import { Image } from "expo-image";
 
 interface WishlistProductCardProps {
   item: WishlistItem;
@@ -23,7 +23,10 @@ const WishlistProductCard = ({ item, onRemove }: WishlistProductCardProps) => {
   const router = useRouter();
   const [isRemoving, setIsRemoving] = useState(false);
 
-  const availableSizes = item?.sizes?.filter((s) => s.stockQuantity > 0) || [];
+  const sizes = Array.isArray(item?.sizes) ? item.sizes : [];
+  const availableSizes = sizes.filter((s) => (s?.stockQuantity ?? 0) > 0);
+  const price = Number(item?.price) || 0;
+  const compareAtPrice = Number(item?.compareAtPrice) || 0;
 
   const [selectedSize, setSelectedSize] = useState(
     availableSizes[0]?.name || ""
@@ -37,34 +40,38 @@ const WishlistProductCard = ({ item, onRemove }: WishlistProductCardProps) => {
 
   const handleRemove = async () => {
     setIsRemoving(true);
-    await onRemove();
-    setIsRemoving(false);
+    try {
+      await onRemove();
+    } finally {
+      setIsRemoving(false);
+    }
+  };
+
+  const openProduct = () => {
+    if (!item?.handle) return;
+    router.push(`/product/${item.handle}` as never);
   };
 
   return (
     <View style={styles.container}>
-      <Pressable
-        onPress={() => router.push(`/product/${item.handle}` as never)}
-        style={styles.imageWrapper}
-      >
-        <Image
-          source={{ uri: item.featured_image }}
-          style={styles.image}
-          resizeMode="cover"
-        />
+      <Pressable onPress={openProduct} style={styles.imageWrapper}>
+        {item?.featured_image ? (
+          <Image
+            source={{ uri: item.featured_image }}
+            style={styles.image}
+            contentFit="cover"
+          />
+        ) : null}
       </Pressable>
 
       <View style={styles.details}>
         <View style={styles.titleRow}>
-          <Pressable
-            onPress={() => router.push(`/product/${item.handle}` as never)}
-            style={styles.titleWrapper}
-          >
-            {item.subCategory ? (
+          <Pressable onPress={openProduct} style={styles.titleWrapper}>
+            {item?.subCategory ? (
               <Text style={styles.subCategory}>{item.subCategory}</Text>
             ) : null}
             <Text style={styles.title} numberOfLines={2}>
-              {item.title}
+              {item?.title ?? ""}
             </Text>
           </Pressable>
 
@@ -83,19 +90,19 @@ const WishlistProductCard = ({ item, onRemove }: WishlistProductCardProps) => {
         </View>
 
         <View style={styles.priceRow}>
-          <Text style={styles.price}>{formatCurrency(item?.price)}</Text>
-          {item.compareAtPrice && item.compareAtPrice > 0 ? (
+          <Text style={styles.price}>{formatCurrency(price)}</Text>
+          {compareAtPrice > 0 ? (
             <Text style={styles.comparePrice}>
-              {formatCurrency(item.compareAtPrice)}
+              {formatCurrency(compareAtPrice)}
             </Text>
           ) : null}
         </View>
 
-        {item?.sizes?.length > 0 ? (
+        {sizes.length > 0 ? (
           <View style={styles.sizesRow}>
-            {item.sizes.map((size, i) => {
+            {sizes.map((size, i) => {
               const isSelected = selectedSize === size.name;
-              const isOOS = size.stockQuantity === 0;
+              const isOOS = (size.stockQuantity ?? 0) === 0;
 
               return (
                 <Pressable
@@ -137,7 +144,7 @@ const WishlistProductCard = ({ item, onRemove }: WishlistProductCardProps) => {
           {selectedSize && inStock > 0 ? (
             <AddToCartButton
               productSize={selectedSize}
-              product={{ ...item, _id: item.productId }}
+              product={{ ...item, _id: item.productId, sizes }}
             />
           ) : availableSizes.length === 0 ? (
             <View style={styles.oosButton}>
