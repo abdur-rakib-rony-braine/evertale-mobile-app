@@ -157,20 +157,17 @@ const CheckoutScreen = () => {
     { title: "Payment" },
   ];
 
-  const getNextButtonText = () => {
-    if (currentStep === 4) return "Complete Order";
-    const next = steps[currentStep];
-    return `Continue to ${next?.title || "Next"}`;
+const getNextButtonText = () => {
+  const map: Record<number, string> = {
+    1: "Next: Billing",
+    2: "Next: Delivery",
+    3: "Next: Payment",
+    4: "Place Order",
   };
+  return map[currentStep] || "Continue";
+};
 
-  const getBackButtonText = () => {
-    const map: Record<number, string> = {
-      2: "Back to Shipping",
-      3: "Back to Billing",
-      4: "Back to Delivery",
-    };
-    return map[currentStep] || "Back";
-  };
+const getBackButtonText = () => "Back";
 
   const stepContent = {
     1: <ShippingForm initialData={formData} userData={dataSource} />,
