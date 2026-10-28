@@ -27,6 +27,7 @@ interface CartState {
   totalItems: number;
   totalAmount: number;
   isLoading: boolean;
+  hasSynced: boolean;
   _lastUserId: string | null;
   _intervalId: ReturnType<typeof setInterval> | null;
 
@@ -50,6 +51,8 @@ interface CartState {
 }
 
 const API_PREFIX = "/api";
+
+let sessionVersion = 0;
 
 const computeTotals = (items: CartItem[]) => ({
   totalItems: items.reduce((sum, i) => sum + i.quantity, 0),
@@ -112,6 +115,7 @@ export const useCartStore = create<CartState>()(
       totalItems: 0,
       totalAmount: 0,
       isLoading: false,
+      hasSynced: false,
       _lastUserId: null,
       _intervalId: null,
 
@@ -119,29 +123,35 @@ export const useCartStore = create<CartState>()(
         const savedCart = get().localCart;
 
         if (savedCart.length === 0) {
-          set({ localCart: [], totalItems: 0, totalAmount: 0 });
+          set({ localCart: [], cartItems: [], totalItems: 0, totalAmount: 0, hasSynced: true });
           return;
         }
 
-        set({ isLoading: true });
+        set({ isLoading: true, cartItems: [] });
         try {
           const refreshedCart = await refreshGuestCart(savedCart);
           set({ localCart: refreshedCart, ...computeTotals(refreshedCart) });
         } finally {
-          set({ isLoading: false });
+          set({ isLoading: false, hasSynced: true });
         }
       },
 
       fetchCart: async () => {
+        const hasCached = get().cartItems.length > 0;
+        if (!hasCached) set({ isLoading: true });
+
         try {
           const { data } = await apiClient.get(`${API_PREFIX}/cart`);
           const validItems: CartItem[] = (data.items || []).filter(isValidItem);
 
           if (!isSame(validItems, get().cartItems)) {
-            set({ cartItems: validItems, ...computeTotals(validItems) });
+            set({ cartItems: validItems });
           }
+          set(computeTotals(validItems));
         } catch (error) {
           console.log("Error fetching cart:", error);
+        } finally {
+          set({ isLoading: false, hasSynced: true });
         }
       },
 
@@ -482,7 +492,7 @@ export const useCartStore = create<CartState>()(
             set({ isLoading: false });
           }
         } else if (userId) {
-          get().fetchCart();
+          await get().fetchCart();
           return false;
         }
         return false;
@@ -530,11 +540,15 @@ export const useCartStore = create<CartState>()(
       },
 
       onSessionChange: async (userId) => {
+        const version = ++sessionVersion;
+        set({ hasSynced: false });
         await waitForHydration();
+        if (version !== sessionVersion) return;
 
         if (!userId) {
           set({ _lastUserId: null });
           await get().loadGuestCart();
+          if (version !== sessionVersion) return;
           get().startRefreshInterval(null);
           return;
         }
@@ -544,6 +558,7 @@ export const useCartStore = create<CartState>()(
         if (get()._lastUserId !== userId) {
           set({ _lastUserId: userId });
           await get().transferGuestCartToUserCart(userId);
+          if (version !== sessionVersion) return;
         }
 
         await get().fetchCart();
@@ -552,7 +567,13 @@ export const useCartStore = create<CartState>()(
     {
       name: "evertale-cart",
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state) => ({ localCart: state.localCart }),
+      partialize: (state) => ({
+        localCart: state.localCart,
+        cartItems: state.cartItems,
+        totalItems: state.totalItems,
+        totalAmount: state.totalAmount,
+        _lastUserId: state._lastUserId,
+      }),
     }
   )
 );

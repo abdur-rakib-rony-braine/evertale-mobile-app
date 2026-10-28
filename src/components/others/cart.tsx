@@ -25,13 +25,16 @@ const useCartHydrated = () => {
 
 const Cart = () => {
   const userId = useAuthStore((s) => s.user?._id ?? null);
+  const isInitialized = useAuthStore((s) => s.isInitialized);
   const hydrated = useCartHydrated();
+  const hasSynced = useCartStore((s) => s.hasSynced);
+  const isLoading = useCartStore((s) => s.isLoading);
   const itemCount = useCartStore(
     (s) => (userId ? s.cartItems : s.localCart).length
   );
-  const isLoading = useCartStore((s) => s.isLoading);
 
-  if (!hydrated || (isLoading && itemCount === 0)) return <CartSkeleton />;
+  if (!hydrated || !isInitialized) return <CartSkeleton />;
+  if (itemCount === 0 && (!hasSynced || isLoading)) return <CartSkeleton />;
 
   return itemCount === 0 ? <EmptyCart /> : <CartTable />;
 };

@@ -28,7 +28,7 @@ interface AnzPaymentButtonProps {
     onClose: () => void;
 }
 
-const isProduction = process.env.EXPO_PUBLIC_NODE_ENV === "production";
+const isProduction = process.env.NODE_ENV === "production";
 const FALLBACK_ORIGIN = isProduction
     ? "https://payment.anzworldline-solutions.com.au"
     : "https://payment.preprod.anzworldline-solutions.com.au";
