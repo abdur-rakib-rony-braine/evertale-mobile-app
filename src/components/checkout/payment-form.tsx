@@ -31,7 +31,6 @@ import { urls } from "@/constants/url";
 
 const PAYMENT_METHODS = [
   { id: "card", label: "Credit / Debit Card", description: "Secure encrypted payment via ANZ" },
-  { id: "googlepay", label: "Google Pay", description: "Fast, secure checkout" },
   { id: "afterpay", label: "Afterpay", description: "Pay in 4 interest-free instalments" },
 ];
 
@@ -200,7 +199,6 @@ export default function PaymentForm() {
         ) : (
           <>
             {selected === "card" && <CreditCard size={18} color="#FFFFFF" />}
-            {selected === "googlepay" && <Text style={styles.payBtnText}>G</Text>}
             {selected === "afterpay" && <Zap size={18} color="#FFFFFF" />}
             <Text style={styles.payBtnText}>
               PAY ${finalTotal.toFixed(2)}
