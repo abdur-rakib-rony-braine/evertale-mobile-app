@@ -4,9 +4,10 @@ import { Animated, StyleSheet, View } from "react-native";
 interface SkeletonProps {
   width?: number | `${number}%`;
   height?: number;
+  radius?: number;
 }
 
-const Skeleton = ({ width = "100%", height = 16 }: SkeletonProps) => {
+const Skeleton = ({ width = "100%", height = 16, radius = 4 }: SkeletonProps) => {
   const opacity = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {
@@ -30,7 +31,10 @@ const Skeleton = ({ width = "100%", height = 16 }: SkeletonProps) => {
 
   return (
     <Animated.View
-      style={[styles.skeletonBase, { width, height, opacity }]}
+      style={[
+        styles.skeletonBase,
+        { width, height, opacity, borderRadius: radius },
+      ]}
     />
   );
 };
@@ -43,9 +47,9 @@ const WishlistCardSkeleton = () => (
       <Skeleton width="80%" height={14} />
       <Skeleton width={80} height={14} />
       <View style={styles.sizesRow}>
-        <Skeleton width={32} height={24} />
-        <Skeleton width={32} height={24} />
-        <Skeleton width={32} height={24} />
+        <Skeleton width={34} height={26} />
+        <Skeleton width={34} height={26} />
+        <Skeleton width={34} height={26} />
       </View>
       <Skeleton width="100%" height={36} />
     </View>
@@ -67,7 +71,7 @@ const WishlistSkeleton = () => {
           </View>
         </View>
 
-        <View>
+        <View style={styles.list}>
           {Array.from({ length: 3 }).map((_, i) => (
             <WishlistCardSkeleton key={i} />
           ))}
@@ -79,14 +83,14 @@ const WishlistSkeleton = () => {
 
 const styles = StyleSheet.create({
   skeletonBase: {
-    backgroundColor: "#F5F5F4",
+    backgroundColor: "#F2EFE9",
   },
 
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
-    paddingVertical: 40,
+    paddingTop: 32,
   },
   content: {
     flexDirection: "column",
@@ -98,28 +102,33 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F4",
-    paddingBottom: 20,
+    borderBottomColor: "#F2EFE9",
+    paddingBottom: 18,
   },
   headerLeft: {
     flex: 1,
     gap: 8,
   },
   headerRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
+    alignItems: "flex-end",
+    gap: 8,
   },
 
+  list: {
+    gap: 12,
+  },
   cardRow: {
-    paddingVertical: 20,
-    paddingHorizontal: 8,
     flexDirection: "row",
-    gap: 16,
+    alignItems: "flex-start",
+    gap: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#F2EFE9",
+    borderRadius: 8,
   },
   cardDetails: {
     flex: 1,
-    gap: 12,
+    gap: 10,
   },
   sizesRow: {
     flexDirection: "row",

@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Heart } from "lucide-react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
 import { apiClient } from "@/lib/api/client";
@@ -29,6 +30,7 @@ const showError = (message: string) =>
 
 const WishlistClient = ({ userId }: WishlistClientProps) => {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const authUserId = useAuthStore((s) => s.user?._id ?? null);
   const activeUserId = authUserId ?? userId ?? null;
@@ -102,7 +104,7 @@ const WishlistClient = ({ userId }: WishlistClientProps) => {
     return (
       <View style={styles.emptyContainer}>
         <View style={styles.emptyIconWrapper}>
-          <Heart size={36} color="#d6d3d1" strokeWidth={1.5} />
+          <Heart size={34} color="#AE7857" strokeWidth={1.5} />
         </View>
 
         <View style={styles.emptyTextWrapper}>
@@ -114,9 +116,9 @@ const WishlistClient = ({ userId }: WishlistClientProps) => {
 
         <Pressable
           onPress={() => router.push("/" as never)}
-          style={styles.outlineButton}
+          style={styles.primaryButton}
         >
-          <Text style={styles.outlineButtonText}>Continue Shopping</Text>
+          <Text style={styles.primaryButtonText}>Continue Shopping</Text>
         </Pressable>
       </View>
     );
@@ -125,13 +127,18 @@ const WishlistClient = ({ userId }: WishlistClientProps) => {
   return (
     <ScrollView
       style={styles.scroll}
-      contentContainerStyle={styles.scrollContent}
+      contentContainerStyle={[
+        styles.scrollContent,
+        { paddingBottom: Math.max(insets.bottom, 12) + 32 },
+      ]}
+      showsVerticalScrollIndicator={false}
     >
       <View style={styles.content}>
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Text style={styles.headerEyebrow}>Saved Items</Text>
             <Text style={styles.headerTitle}>Wishlist</Text>
+            <View style={styles.divider} />
           </View>
 
           <View style={styles.headerRight}>
@@ -143,11 +150,12 @@ const WishlistClient = ({ userId }: WishlistClientProps) => {
             <Pressable
               onPress={removeAllFromWishlist}
               disabled={isRemovingAll}
+              hitSlop={8}
               style={styles.clearAllButton}
             >
               {isRemovingAll ? (
                 <>
-                  <ActivityIndicator size="small" color="#a8a29e" />
+                  <ActivityIndicator size="small" color="#AE7857" />
                   <Text style={styles.clearAllText}>Removing...</Text>
                 </>
               ) : (
@@ -157,7 +165,7 @@ const WishlistClient = ({ userId }: WishlistClientProps) => {
           </View>
         </View>
 
-        <View>
+        <View style={styles.list}>
           {wishlistItems.map((item) => (
             <WishlistProductCard
               key={item.productId}
@@ -186,7 +194,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   scrollContent: {
-    paddingVertical: 40,
+    paddingTop: 32,
     paddingHorizontal: 16,
   },
   content: {
@@ -199,15 +207,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F4",
-    paddingBottom: 20,
+    borderBottomColor: "#F2EFE9",
+    paddingBottom: 18,
   },
   headerLeft: {
     flex: 1,
     minWidth: 0,
   },
   headerEyebrow: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "600",
     letterSpacing: 2.6,
     textTransform: "uppercase",
@@ -216,14 +224,19 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 30,
-    fontWeight: "600",
-    color: "#1C1917",
-    lineHeight: 34,
+    fontFamily: "Rexagus",
+    color: "#2B2520",
+    lineHeight: 36,
+  },
+  divider: {
+    width: 36,
+    height: 2,
+    backgroundColor: "#AE7857",
+    marginTop: 8,
   },
   headerRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
+    alignItems: "flex-end",
+    gap: 8,
     flexShrink: 0,
   },
   countText: {
@@ -237,25 +250,49 @@ const styles = StyleSheet.create({
   },
   clearAllText: {
     fontSize: 12,
-    color: "#A8A29E",
+    fontWeight: "600",
+    letterSpacing: 0.4,
+    color: "#AE7857",
+  },
+
+  list: {
+    gap: 12,
   },
 
   footer: {
     alignItems: "center",
-    paddingTop: 16,
+    paddingTop: 8,
   },
   outlineButton: {
+    height: 46,
+    paddingHorizontal: 28,
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#1C1917",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
+    borderColor: "#2B2520",
+    borderRadius: 4,
   },
   outlineButtonText: {
     fontSize: 12,
-    letterSpacing: 1,
+    letterSpacing: 1.2,
     textTransform: "uppercase",
-    fontWeight: "600",
-    color: "#1C1917",
+    fontWeight: "700",
+    color: "#2B2520",
+  },
+  primaryButton: {
+    height: 46,
+    paddingHorizontal: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 4,
+    backgroundColor: "#AE7857",
+  },
+  primaryButtonText: {
+    fontSize: 12,
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+    fontWeight: "700",
+    color: "#FFFFFF",
   },
 
   emptyContainer: {
@@ -271,16 +308,16 @@ const styles = StyleSheet.create({
     width: 80,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 999,
-    backgroundColor: "#F5F5F4",
+    borderRadius: 40,
+    backgroundColor: "#F2EFE9",
   },
   emptyTextWrapper: {
     alignItems: "center",
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#292524",
+    fontSize: 22,
+    fontFamily: "Rexagus",
+    color: "#2B2520",
     marginBottom: 8,
     textAlign: "center",
   },
@@ -289,6 +326,7 @@ const styles = StyleSheet.create({
     color: "#A8A29E",
     textAlign: "center",
     maxWidth: 280,
+    lineHeight: 20,
   },
 });
 

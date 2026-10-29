@@ -7,11 +7,11 @@ import {
   View,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { X, Slash } from "lucide-react-native";
-import { Image } from "expo-image";
+import { X } from "lucide-react-native";
 
 import { WishlistItem } from "@/store/wishlist-store";
 import { formatCurrency } from "@/lib/format";
+import ImageContainer from "@/components/image-container";
 import AddToCartButton from "./add-to-cart-button";
 
 interface WishlistProductCardProps {
@@ -27,6 +27,7 @@ const WishlistProductCard = ({ item, onRemove }: WishlistProductCardProps) => {
   const availableSizes = sizes.filter((s) => (s?.stockQuantity ?? 0) > 0);
   const price = Number(item?.price) || 0;
   const compareAtPrice = Number(item?.compareAtPrice) || 0;
+  const hasDiscount = compareAtPrice > price;
 
   const [selectedSize, setSelectedSize] = useState(
     availableSizes[0]?.name || ""
@@ -55,13 +56,12 @@ const WishlistProductCard = ({ item, onRemove }: WishlistProductCardProps) => {
   return (
     <View style={styles.container}>
       <Pressable onPress={openProduct} style={styles.imageWrapper}>
-        {item?.featured_image ? (
-          <Image
-            source={{ uri: item.featured_image }}
-            style={styles.image}
-            contentFit="cover"
-          />
-        ) : null}
+        <ImageContainer
+          uri={item?.featured_image}
+          backgroundColor="#F2EFE9"
+          placeholderText=""
+          fallbackAspectRatio={6 / 7}
+        />
       </Pressable>
 
       <View style={styles.details}>
@@ -78,20 +78,23 @@ const WishlistProductCard = ({ item, onRemove }: WishlistProductCardProps) => {
           <Pressable
             onPress={handleRemove}
             disabled={isRemoving}
+            hitSlop={6}
             style={styles.removeButton}
             accessibilityLabel="Remove from wishlist"
           >
             {isRemoving ? (
-              <ActivityIndicator size="small" color="#a8a29e" />
+              <ActivityIndicator size="small" color="#AE7857" />
             ) : (
-              <X size={14} color="#d6d3d1" />
+              <X size={14} color="#78716C" strokeWidth={2} />
             )}
           </Pressable>
         </View>
 
         <View style={styles.priceRow}>
-          <Text style={styles.price}>{formatCurrency(price)}</Text>
-          {compareAtPrice > 0 ? (
+          <Text style={[styles.price, hasDiscount && styles.priceSale]}>
+            {formatCurrency(price)}
+          </Text>
+          {hasDiscount ? (
             <Text style={styles.comparePrice}>
               {formatCurrency(compareAtPrice)}
             </Text>
@@ -111,29 +114,19 @@ const WishlistProductCard = ({ item, onRemove }: WishlistProductCardProps) => {
                   disabled={isOOS}
                   style={[
                     styles.sizeButton,
-                    isSelected
-                      ? styles.sizeButtonSelected
-                      : styles.sizeButtonDefault,
+                    isSelected && styles.sizeButtonSelected,
                     isOOS && styles.sizeButtonOOS,
                   ]}
                 >
                   <Text
                     style={[
                       styles.sizeText,
-                      isSelected
-                        ? styles.sizeTextSelected
-                        : isOOS
-                        ? styles.sizeTextOOS
-                        : styles.sizeTextDefault,
+                      isSelected && styles.sizeTextSelected,
+                      isOOS && styles.sizeTextOOS,
                     ]}
                   >
                     {size.name}
                   </Text>
-                  {isOOS ? (
-                    <View style={styles.oosOverlay}>
-                      <Slash size={14} color="#e7e5e4" />
-                    </View>
-                  ) : null}
                 </Pressable>
               );
             })}
@@ -163,23 +156,22 @@ const WishlistProductCard = ({ item, onRemove }: WishlistProductCardProps) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 20,
-    paddingHorizontal: 8,
     flexDirection: "row",
-    gap: 16,
+    alignItems: "flex-start",
+    gap: 14,
+    padding: 12,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#F2EFE9",
+    borderRadius: 8,
   },
 
   imageWrapper: {
-    position: "relative",
-    height: 112,
     width: 96,
     flexShrink: 0,
     overflow: "hidden",
-    backgroundColor: "#F5F5F4",
-  },
-  image: {
-    height: "100%",
-    width: "100%",
+    borderRadius: 4,
+    backgroundColor: "#F2EFE9",
   },
 
   details: {
@@ -200,9 +192,9 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   subCategory: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: "600",
-    letterSpacing: 1.8,
+    letterSpacing: 1.4,
     textTransform: "uppercase",
     color: "#A8A29E",
     marginBottom: 2,
@@ -210,15 +202,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#292524",
+    color: "#2B2520",
     lineHeight: 18,
   },
   removeButton: {
     flexShrink: 0,
-    height: 32,
-    width: 32,
+    height: 28,
+    width: 28,
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: 14,
+    backgroundColor: "#F2EFE9",
   },
 
   priceRow: {
@@ -228,12 +222,15 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#1C1917",
+    fontWeight: "700",
+    color: "#2B2520",
+  },
+  priceSale: {
+    color: "#AE7857",
   },
   comparePrice: {
     fontSize: 12,
-    color: "#A8A29E",
+    color: "#9A9187",
     textDecorationLine: "line-through",
   },
 
@@ -243,42 +240,35 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   sizeButton: {
-    position: "relative",
+    minWidth: 34,
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 5,
+    alignItems: "center",
     borderWidth: 1,
-  },
-  sizeButtonDefault: {
     borderColor: "#E7E5E4",
+    borderRadius: 4,
+    backgroundColor: "#FFFFFF",
   },
   sizeButtonSelected: {
-    borderColor: "#1C1917",
-    borderWidth: 2,
+    borderColor: "#AE7857",
+    backgroundColor: "#AE7857",
   },
   sizeButtonOOS: {
     borderColor: "#F5F5F4",
+    backgroundColor: "#FAFAF9",
   },
   sizeText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "500",
-  },
-  sizeTextDefault: {
-    color: "#78716C",
+    color: "#57534E",
   },
   sizeTextSelected: {
-    color: "#1C1917",
+    color: "#FFFFFF",
+    fontWeight: "700",
   },
   sizeTextOOS: {
-    color: "#E7E5E4",
-  },
-  oosOverlay: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    alignItems: "center",
-    justifyContent: "center",
+    color: "#D6D3D1",
+    textDecorationLine: "line-through",
   },
 
   actionWrapper: {
@@ -287,32 +277,32 @@ const styles = StyleSheet.create({
   oosButton: {
     width: "100%",
     height: 36,
-    borderWidth: 1,
-    borderColor: "#F5F5F4",
+    borderRadius: 4,
+    backgroundColor: "#F5F5F4",
     alignItems: "center",
     justifyContent: "center",
   },
   oosButtonText: {
     color: "#D6D3D1",
-    fontSize: 12,
-    letterSpacing: 1,
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 0.6,
     textTransform: "uppercase",
-    fontWeight: "500",
   },
   selectSizeButton: {
     width: "100%",
     height: 36,
-    borderWidth: 1,
-    borderColor: "#E7E5E4",
+    borderRadius: 4,
+    backgroundColor: "#F2EFE9",
     alignItems: "center",
     justifyContent: "center",
   },
   selectSizeButtonText: {
-    color: "#A8A29E",
-    fontSize: 12,
-    letterSpacing: 1,
+    color: "#7A5C44",
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 0.6,
     textTransform: "uppercase",
-    fontWeight: "500",
   },
 });
 
