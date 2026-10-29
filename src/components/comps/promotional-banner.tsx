@@ -1,17 +1,14 @@
 import { useEffect, useState } from "react";
-import {
-  ImageBackground,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 
 import {
   fetchPromotionalBanner,
   PromoBanner,
 } from "@/lib/api/promotional-banner";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 interface TimeLeft {
   days: number;
@@ -31,6 +28,8 @@ export default function PromotionalBanner() {
     minutes: 0,
     seconds: 0,
   });
+  const [ratio, setRatio] = useState<number | null>(null);
+  const [contentHeight, setContentHeight] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -87,13 +86,29 @@ export default function PromotionalBanner() {
     { label: "SECONDS", value: timeLeft.seconds },
   ];
 
+  const imageHeight = ratio ? SCREEN_WIDTH / ratio : 0;
+  const height = Math.max(imageHeight, contentHeight);
+
   return (
-    <ImageBackground
-      source={{ uri: banner.imageUrl }}
-      resizeMode="cover"
-      style={styles.bg}
+    <View
+      style={[styles.bg, height > 0 ? { height } : null]}
     >
-      <View style={styles.content}>
+      <Image
+        source={{ uri: banner.imageUrl }}
+        contentFit="cover"
+        cachePolicy="memory-disk"
+        transition={150}
+        style={StyleSheet.absoluteFill}
+        onLoad={(e) => {
+          const { width: w, height: h } = e.source;
+          if (w > 0 && h > 0) setRatio(w / h);
+        }}
+      />
+
+      <View
+        style={styles.content}
+        onLayout={(e) => setContentHeight(e.nativeEvent.layout.height)}
+      >
         {banner.title ? (
           <Text style={styles.title}>{banner.title}</Text>
         ) : null}
@@ -130,7 +145,7 @@ export default function PromotionalBanner() {
           <Text style={styles.buttonText}>SHOP NOW</Text>
         </Pressable>
       </View>
-    </ImageBackground>
+    </View>
   );
 }
 
@@ -138,13 +153,15 @@ const styles = StyleSheet.create({
   bg: {
     width: "100%",
     overflow: "hidden",
+    justifyContent: "center",
+    backgroundColor: "#F2EFE9",
   },
   content: {
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 16,
-    paddingVertical: 64,
+    paddingVertical: 40,
   },
   title: {
     textAlign: "center",

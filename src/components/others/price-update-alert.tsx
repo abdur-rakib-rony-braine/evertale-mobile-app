@@ -15,9 +15,9 @@ const PriceUpdateAlert = ({ item, onDismiss }: PriceUpdateAlertProps) => {
   return (
     <View style={styles.container}>
       {item.priceChanged ? (
-        <AlertCircle size={16} color="#3B82F6" style={styles.icon} />
+        <AlertCircle size={16} color="#AE7857" style={styles.icon} />
       ) : (
-        <CheckCircle size={16} color="#22C55E" style={styles.icon} />
+        <CheckCircle size={16} color="#AE7857" style={styles.icon} />
       )}
 
       <View style={styles.content}>
@@ -45,7 +45,7 @@ const PriceUpdateAlert = ({ item, onDismiss }: PriceUpdateAlertProps) => {
           hitSlop={8}
           accessibilityLabel="Dismiss"
         >
-          <X size={14} color="#a8a29e" />
+          <X size={14} color="#78716C" />
         </Pressable>
       ) : null}
     </View>
@@ -58,9 +58,10 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     gap: 12,
     borderWidth: 1,
-    borderColor: "#DBEAFE",
-    backgroundColor: "#EFF6FF",
-    paddingHorizontal: 16,
+    borderColor: "#E8DDD3",
+    borderRadius: 8,
+    backgroundColor: "#F2EFE9",
+    paddingHorizontal: 14,
     paddingVertical: 12,
   },
   icon: {
@@ -72,8 +73,8 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 12,
-    fontWeight: "600",
-    color: "#44403C",
+    fontWeight: "700",
+    color: "#2B2520",
     marginBottom: 2,
   },
   title: {
@@ -88,13 +89,13 @@ const styles = StyleSheet.create({
   },
   oldPrice: {
     fontSize: 12,
-    color: "#F87171",
+    color: "#9A9187",
     textDecorationLine: "line-through",
   },
   newPrice: {
     fontSize: 12,
-    fontWeight: "600",
-    color: "#16A34A",
+    fontWeight: "700",
+    color: "#AE7857",
   },
 });
 

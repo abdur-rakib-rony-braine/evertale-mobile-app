@@ -32,13 +32,13 @@ const RemoveFromCart = ({ data, onRemove }: RemoveFromCartProps) => {
       onPress={handleRemoveFromCart}
       disabled={isLoading}
       accessibilityLabel="Remove from cart"
-      hitSlop={8}
+      hitSlop={6}
       style={[styles.button, isLoading && styles.buttonDisabled]}
     >
       {isLoading ? (
-        <ActivityIndicator size="small" color="#a8a29e" />
+        <ActivityIndicator size="small" color="#DC2626" />
       ) : (
-        <Trash2 size={14} color="#a8a29e" strokeWidth={1.8} />
+        <Trash2 size={15} color="#78716C" strokeWidth={1.8} />
       )}
     </Pressable>
   );
@@ -46,11 +46,15 @@ const RemoveFromCart = ({ data, onRemove }: RemoveFromCartProps) => {
 
 const styles = StyleSheet.create({
   button: {
+    width: 32,
+    height: 32,
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: 16,
+    backgroundColor: "#F2EFE9",
   },
   buttonDisabled: {
-    opacity: 0.4,
+    opacity: 0.5,
   },
 });
 

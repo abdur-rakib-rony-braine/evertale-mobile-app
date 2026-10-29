@@ -73,28 +73,34 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   chip: {
+    minWidth: 34,
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderWidth: 1,
     borderColor: "#E7E5E4",
+    borderRadius: 4,
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
   },
   chipSelected: {
-    borderColor: "#1C1917",
-    borderWidth: 2,
+    borderColor: "#AE7857",
+    backgroundColor: "#AE7857",
   },
   chipOOS: {
     borderColor: "#F5F5F4",
+    backgroundColor: "#FAFAF9",
   },
   chipText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "500",
-    color: "#78716C",
+    color: "#57534E",
   },
   chipTextSelected: {
-    color: "#1C1917",
+    color: "#FFFFFF",
+    fontWeight: "700",
   },
   chipTextOOS: {
-    color: "#E7E5E4",
+    color: "#D6D3D1",
     textDecorationLine: "line-through",
   },
 });

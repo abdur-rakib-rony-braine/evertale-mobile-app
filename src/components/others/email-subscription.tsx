@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   ActivityIndicator,
+  Dimensions,
   Pressable,
   StyleSheet,
   Text,
@@ -12,29 +13,38 @@ import Toast from "react-native-toast-message";
 
 import { apiClient } from "@/lib/api/client";
 
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const STACK = SCREEN_WIDTH < 360;
+
 export default function EmailSubscription() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [focused, setFocused] = useState(false);
 
   const handleSubmit = async () => {
+    if (isLoading) return;
     setError("");
-    
-    if (!email) {
+
+    const value = email.trim();
+
+    if (!value) {
       setError("Email is required");
       return;
     }
 
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(value)) {
       setError("Please enter a valid email address");
       return;
     }
 
     setIsLoading(true);
     try {
-      const res = await apiClient.post("/api/email-subscriber", { email });
-      
+      const res = await apiClient.post("/api/email-subscriber", {
+        email: value,
+      });
+
       if (res.data?.success) {
         Toast.show({
           type: "success",
@@ -44,7 +54,7 @@ export default function EmailSubscription() {
       } else {
         Toast.show({
           type: "error",
-          text1: res.data.message || "Subscription failed.",
+          text1: res.data?.message || "Subscription failed.",
         });
       }
     } catch (err: any) {
@@ -69,23 +79,40 @@ export default function EmailSubscription() {
       </Text>
 
       <View style={styles.formContainer}>
-        <View style={styles.inputWrapper}>
+        <View
+          style={[
+            styles.inputWrapper,
+            STACK && styles.inputWrapperStacked,
+            focused && styles.inputWrapperFocused,
+            !!error && styles.inputWrapperError,
+          ]}
+        >
           <TextInput
-            style={styles.input}
+            style={[styles.input, STACK && styles.inputStacked]}
             placeholder="Your email address"
-            placeholderTextColor="rgba(255,255,255,0.5)"
+            placeholderTextColor="rgba(255,255,255,0.6)"
             value={email}
             onChangeText={(text) => {
               setEmail(text);
               if (error) setError("");
             }}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            onSubmitEditing={handleSubmit}
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
+            autoComplete="email"
+            textContentType="emailAddress"
+            returnKeyType="send"
             editable={!isLoading}
           />
           <Pressable
-            style={[styles.button, isLoading && styles.buttonDisabled]}
+            style={[
+              styles.button,
+              STACK && styles.buttonStacked,
+              isLoading && styles.buttonDisabled,
+            ]}
             onPress={handleSubmit}
             disabled={isLoading}
           >
@@ -94,17 +121,19 @@ export default function EmailSubscription() {
             ) : (
               <>
                 <Text style={styles.buttonText}>Notify Me</Text>
-                <ArrowRight size={14} color="#6B4B3E" />
+                <ArrowRight size={14} color="#6B4B3E" strokeWidth={2} />
               </>
             )}
           </Pressable>
         </View>
 
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+        {error ? (
+          <View style={styles.errorPill}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : null}
 
-        <Text style={styles.footerText}>
-          No spam. Unsubscribe any time.
-        </Text>
+        <Text style={styles.footerText}>No spam. Unsubscribe any time.</Text>
       </View>
     </View>
   );
@@ -113,17 +142,17 @@ export default function EmailSubscription() {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#AE7857",
-    paddingVertical: 64,
+    paddingVertical: 56,
     paddingHorizontal: 20,
     alignItems: "center",
   },
   subtitle: {
     fontSize: 10,
     fontWeight: "600",
-    letterSpacing: 2.2,
+    letterSpacing: 2.4,
     textTransform: "uppercase",
-    color: "rgba(255,255,255,0.5)",
-    marginBottom: 16,
+    color: "rgba(255,255,255,0.7)",
+    marginBottom: 14,
   },
   title: {
     fontSize: 32,
@@ -134,10 +163,10 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.7)",
+    color: "rgba(255,255,255,0.85)",
     textAlign: "center",
     lineHeight: 22,
-    marginBottom: 32,
+    marginBottom: 28,
     maxWidth: 320,
   },
   formContainer: {
@@ -147,10 +176,23 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "rgba(255,255,255,0.12)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
+    borderColor: "rgba(255,255,255,0.3)",
+    borderRadius: 4,
     padding: 6,
+  },
+  inputWrapperStacked: {
+    flexDirection: "column",
+    alignItems: "stretch",
+    gap: 6,
+  },
+  inputWrapperFocused: {
+    borderColor: "#FFFFFF",
+    backgroundColor: "rgba(255,255,255,0.18)",
+  },
+  inputWrapperError: {
+    borderColor: "#FFD6D6",
   },
   input: {
     flex: 1,
@@ -159,34 +201,49 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 14,
   },
+  inputStacked: {
+    flex: 0,
+  },
   button: {
     height: 44,
-    backgroundColor: "rgba(255,255,255,0.9)",
-    paddingHorizontal: 20,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 3,
+    paddingHorizontal: 18,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
+  },
+  buttonStacked: {
+    width: "100%",
   },
   buttonDisabled: {
     opacity: 0.7,
   },
   buttonText: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "700",
     color: "#6B4B3E",
     textTransform: "uppercase",
     letterSpacing: 1.2,
   },
+  errorPill: {
+    alignSelf: "center",
+    marginTop: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
+    backgroundColor: "rgba(120,20,20,0.35)",
+  },
   errorText: {
-    color: "rgba(255,255,255,0.7)",
+    color: "#FFFFFF",
     fontSize: 12,
-    marginTop: 8,
+    fontWeight: "500",
     textAlign: "center",
   },
   footerText: {
     fontSize: 11,
-    color: "rgba(255,255,255,0.4)",
+    color: "rgba(255,255,255,0.6)",
     textAlign: "center",
     marginTop: 16,
     letterSpacing: 0.5,

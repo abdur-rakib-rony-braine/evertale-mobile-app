@@ -1,8 +1,11 @@
-import { ImageBackground, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image as RNImage, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
 import { ArrowRight } from "lucide-react-native";
 import { useRouter } from "expo-router";
 
 import { images } from "@/constants/images";
+
+const FALLBACK_RATIO = 3 / 4;
 
 interface Category {
   _id: number;
@@ -42,6 +45,13 @@ const categoriesData: Category[] = [
   },
 ];
 
+const ratioFor = (source: any) => {
+  const resolved = RNImage.resolveAssetSource(source);
+  const w = resolved?.width ?? 0;
+  const h = resolved?.height ?? 0;
+  return w > 0 && h > 0 ? w / h : FALLBACK_RATIO;
+};
+
 export default function CategorySection() {
   const router = useRouter();
 
@@ -56,29 +66,34 @@ export default function CategorySection() {
         <Pressable
           key={category._id}
           onPress={() => handlePress(category)}
-          style={styles.card}
+          style={({ pressed }) => [
+            styles.card,
+            pressed && !category.comingSoon && styles.cardPressed,
+          ]}
         >
-          <ImageBackground
-            source={category.imageSrc}
-            resizeMode="cover"
-            style={styles.imageBg}
-          >
-            <View style={styles.overlay} />
-            <View style={styles.content}>
-              <Text style={styles.subtitle}>{category.subtitle}</Text>
-              <Text style={styles.title}>{category.title}</Text>
-              <View style={styles.buttonRow}>
-                <Text style={styles.buttonText}>{category.buttonText}</Text>
-                <ArrowRight size={14} color="#FFFFFF" strokeWidth={2} />
-              </View>
-            </View>
+          <View style={{ width: "100%", aspectRatio: ratioFor(category.imageSrc) }}>
+            <Image
+              source={category.imageSrc}
+              contentFit="cover"
+              transition={150}
+              style={styles.image}
+            />
+          </View>
 
-            {category.comingSoon && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>Coming Soon</Text>
-              </View>
-            )}
-          </ImageBackground>
+          <View style={styles.overlay} pointerEvents="none">
+            <Text style={styles.subtitle}>{category.subtitle}</Text>
+            <Text style={styles.title}>{category.title}</Text>
+            <View style={styles.button}>
+              <Text style={styles.buttonText}>{category.buttonText}</Text>
+              <ArrowRight size={12} color="#2B2520" strokeWidth={2} />
+            </View>
+          </View>
+
+          {category.comingSoon ? (
+            <View style={styles.badge} pointerEvents="none">
+              <Text style={styles.badgeText}>Coming Soon</Text>
+            </View>
+          ) : null}
         </Pressable>
       ))}
     </View>
@@ -93,67 +108,74 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   card: {
-    aspectRatio: 3 / 4,
     width: "100%",
     borderRadius: 8,
     overflow: "hidden",
+    backgroundColor: "#F2EFE9",
   },
-  imageBg: {
+  cardPressed: {
+    opacity: 0.92,
+  },
+  image: {
     width: "100%",
     height: "100%",
-    justifyContent: "flex-end",
   },
   overlay: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(0,0,0,0.28)",
-  },
-  content: {
-    padding: 20,
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 20,
+    paddingTop: 28,
+    paddingBottom: 20,
+    backgroundColor: "rgba(43,37,32,0.38)",
   },
   subtitle: {
-    color: "rgba(255,255,255,0.7)",
+    color: "rgba(255,255,255,0.8)",
     fontSize: 10,
-    letterSpacing: 2,
+    fontWeight: "600",
+    letterSpacing: 2.2,
     textTransform: "uppercase",
     marginBottom: 4,
-    fontWeight: "300",
   },
   title: {
     color: "#FFFFFF",
     fontSize: 30,
     fontFamily: "Rexagus",
-    marginBottom: 12,
-    lineHeight: 32,
+    lineHeight: 34,
+    marginBottom: 14,
   },
-  buttonRow: {
+  button: {
+    alignSelf: "flex-start",
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: "#FFFFFF",
   },
   buttonText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    letterSpacing: 1.5,
+    color: "#2B2520",
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 1.2,
     textTransform: "uppercase",
-    fontWeight: "500",
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.5)",
-    paddingBottom: 1,
   },
   badge: {
     position: "absolute",
     top: 16,
     right: 16,
-    backgroundColor: "rgba(255,255,255,0.9)",
+    backgroundColor: "#AE7857",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 4,
   },
   badgeText: {
     fontSize: 10,
-    letterSpacing: 2,
+    fontWeight: "700",
+    letterSpacing: 1.8,
     textTransform: "uppercase",
-    fontWeight: "500",
-    color: "#44403C",
+    color: "#FFFFFF",
   },
 });

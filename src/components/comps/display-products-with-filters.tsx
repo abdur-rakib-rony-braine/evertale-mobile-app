@@ -1,3 +1,4 @@
+import { SlidersHorizontal, X } from "lucide-react-native";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -10,16 +11,19 @@ import {
   Text,
   View,
 } from "react-native";
-import { SlidersHorizontal, X } from "lucide-react-native";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 import ProductCard from "@/components/comps/product-card";
 import { Product } from "@/lib/api/products";
-import SearchPromoBanner from "./search-promo-banner";
 import DressCategories from "./dress-categories";
 import Filters from "./filters";
+import SearchPromoBanner from "./search-promo-banner";
 
 const { width } = Dimensions.get("window");
-const CARD_GAP = 12;
+const CARD_GAP = 4;
 const HORIZONTAL_PADDING = 16;
 const CARD_WIDTH = (width - HORIZONTAL_PADDING * 2 - CARD_GAP) / 2;
 
@@ -35,6 +39,56 @@ interface DisplayProductsWithFiltersProps {
   activeFilters?: Record<string, string>;
   onFilterChange?: (type: string, val: string) => void;
   onClearFilters?: () => void;
+}
+
+interface FilterSheetProps {
+  activeFilters: Record<string, string>;
+  onFilterChange?: (type: string, val: string) => void;
+  onClearFilters?: () => void;
+  onClose: () => void;
+}
+
+function FilterSheet({
+  activeFilters,
+  onFilterChange,
+  onClearFilters,
+  onClose,
+}: FilterSheetProps) {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <View style={styles.modalBackdrop}>
+      <View style={styles.modalSheet}>
+        <View style={styles.modalHeader}>
+          <Text style={styles.modalTitle}>Filters</Text>
+          <Pressable onPress={onClose} hitSlop={10}>
+            <X size={20} color="#78716C" />
+          </Pressable>
+        </View>
+
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <Filters
+            activeFilters={activeFilters}
+            onChange={(type, value) => onFilterChange?.(type, value)}
+          />
+        </ScrollView>
+
+        <View
+          style={[
+            styles.modalFooter,
+            { paddingBottom: Math.max(insets.bottom, 12) + 8 },
+          ]}
+        >
+          <Pressable style={styles.clearFiltersBtn} onPress={onClearFilters}>
+            <Text style={styles.clearFiltersText}>Clear All</Text>
+          </Pressable>
+          <Pressable style={styles.applyBtn} onPress={onClose}>
+            <Text style={styles.applyBtnText}>Apply Filters</Text>
+          </Pressable>
+        </View>
+      </View>
+    </View>
+  );
 }
 
 export default function DisplayProductsWithFilters({
@@ -126,34 +180,18 @@ export default function DisplayProductsWithFilters({
         visible={isFilterOpen}
         animationType="slide"
         transparent
+        statusBarTranslucent
+        navigationBarTranslucent
         onRequestClose={() => setIsFilterOpen(false)}
       >
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalSheet}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Filters</Text>
-              <Pressable onPress={() => setIsFilterOpen(false)} hitSlop={10}>
-                <X size={20} color="#78716C" />
-              </Pressable>
-            </View>
-
-            <ScrollView showsVerticalScrollIndicator={false}>
-              <Filters
-                activeFilters={activeFilters}
-                onChange={(type, value) => onFilterChange?.(type, value)}
-              />
-            </ScrollView>
-
-            <View style={styles.modalFooter}>
-              <Pressable style={styles.clearFiltersBtn} onPress={onClearFilters}>
-                <Text style={styles.clearFiltersText}>Clear All</Text>
-              </Pressable>
-              <Pressable style={styles.applyBtn} onPress={() => setIsFilterOpen(false)}>
-                <Text style={styles.applyBtnText}>Apply Filters</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
+        <SafeAreaProvider>
+          <FilterSheet
+            activeFilters={activeFilters}
+            onFilterChange={onFilterChange}
+            onClearFilters={onClearFilters}
+            onClose={() => setIsFilterOpen(false)}
+          />
+        </SafeAreaProvider>
       </Modal>
     </View>
   );
@@ -217,7 +255,7 @@ const styles = StyleSheet.create({
   gridRow: { justifyContent: "space-between", gap: CARD_GAP, marginBottom: CARD_GAP },
   resultCount: { fontSize: 12, color: "#78716C", marginBottom: 12 },
   modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" },
-  modalSheet: { backgroundColor: "#FFFFFF", borderTopLeftRadius: 16, borderTopRightRadius: 16, maxHeight: "90%", paddingBottom: 20 },
+  modalSheet: { backgroundColor: "#FFFFFF", borderTopLeftRadius: 16, borderTopRightRadius: 16, maxHeight: "90%" },
   modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: "#F5F5F4" },
   modalTitle: { fontSize: 16, fontWeight: "600", color: "#292524" },
   modalFooter: { flexDirection: "row", gap: 12, paddingHorizontal: 20, paddingTop: 16, borderTopWidth: 1, borderTopColor: "#F5F5F4" },

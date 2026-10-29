@@ -17,10 +17,9 @@ import { productToWishlistItem } from "@/lib/wishlist-item";
 import type { Product } from "@/lib/api/products";
 import WishlistButton from "../comps/wishlist-button";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const SLIDE_ASPECT = 4 / 5;
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+const FALLBACK_ASPECT = 4 / 5;
 const SLIDE_WIDTH = SCREEN_WIDTH;
-const SLIDE_HEIGHT = SLIDE_WIDTH / SLIDE_ASPECT;
 
 const isVideoFile = (url?: string) => {
   if (!url) return false;
@@ -40,6 +39,7 @@ const ProductMediaGrid = ({
   product,
 }: ProductMediaGridProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [ratios, setRatios] = useState<Record<number, number>>({});
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const lightboxListRef = useRef<FlatList<string>>(null);
@@ -49,6 +49,11 @@ const ProductMediaGrid = ({
       Image.prefetch(media[0], "memory-disk");
     }
   }, [media]);
+
+  const heightFor = useCallback(
+    (index: number) => SLIDE_WIDTH / (ratios[index] ?? FALLBACK_ASPECT),
+    [ratios]
+  );
 
   const handleMomentumEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const index = Math.round(e.nativeEvent.contentOffset.x / SLIDE_WIDTH);
@@ -77,7 +82,7 @@ const ProductMediaGrid = ({
       return (
         <Pressable
           onPress={() => openLightbox(index)}
-          style={[styles.slide, { height: SLIDE_HEIGHT }]}
+          style={[styles.slide, { height: heightFor(index) }]}
         >
           {uri ? (
             <Image
@@ -86,6 +91,14 @@ const ProductMediaGrid = ({
               contentFit="cover"
               cachePolicy="memory-disk"
               transition={150}
+              onLoad={(e) => {
+                const { width: w, height: h } = e.source;
+                if (w > 0 && h > 0) {
+                  setRatios((prev) =>
+                    prev[index] === w / h ? prev : { ...prev, [index]: w / h }
+                  );
+                }
+              }}
             />
           ) : (
             <View style={styles.slidePlaceholder} />
@@ -101,13 +114,13 @@ const ProductMediaGrid = ({
         </Pressable>
       );
     },
-    [videoThumbnail, openLightbox]
+    [videoThumbnail, openLightbox, heightFor]
   );
 
   if (!media?.length) return null;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { height: heightFor(activeIndex) }]}>
       <View style={styles.wishlistWrap}>
         <View style={styles.wishlistCircle}>
           <WishlistButton item={productToWishlistItem(product)} />
@@ -122,6 +135,7 @@ const ProductMediaGrid = ({
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={handleMomentumEnd}
         renderItem={({ item, index }) => renderMedia(item, index)}
+        extraData={ratios}
         windowSize={3}
         initialNumToRender={1}
         maxToRenderPerBatch={2}
@@ -251,6 +265,7 @@ const styles = StyleSheet.create({
   container: {
     width: "100%",
     position: "relative",
+    overflow: "hidden",
     backgroundColor: "#F2EFE9",
   },
   wishlistWrap: {
@@ -339,7 +354,7 @@ const styles = StyleSheet.create({
   },
   lightboxImage: {
     width: SCREEN_WIDTH,
-    height: SCREEN_WIDTH / SLIDE_ASPECT,
+    height: SCREEN_HEIGHT,
   },
   lightboxNav: {
     position: "absolute",

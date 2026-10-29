@@ -1,4 +1,3 @@
-import { Image } from "expo-image";
 import { useCallback, useRef, useState } from "react";
 import {
   Dimensions,
@@ -8,6 +7,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import ImageContainer from "../image-container";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -24,7 +24,7 @@ export default function ProductViewCarousel({
 }: ProductViewCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const listRef = useRef<FlatList<string>>(null);
-  
+
   const slideWidth = containerWidth ?? screenWidth;
   const slideHeight = slideWidth / aspectRatio;
 
@@ -61,10 +61,10 @@ export default function ProductViewCarousel({
         })}
         renderItem={({ item }) => (
           <View style={{ width: slideWidth, height: slideHeight }}>
-            <Image
-              source={{ uri: item }}
-              style={styles.image}
-              resizeMode="cover"
+            <ImageContainer
+              uri={item}
+              backgroundColor="#F2EFE9"
+              adaptToImage={false}
             />
           </View>
         )}
@@ -92,10 +92,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F5F4",
     alignItems: "center",
     justifyContent: "center",
-  },
-  image: {
-    width: "100%",
-    height: "100%",
   },
   paginationRow: {
     position: "absolute",

@@ -8,20 +8,22 @@ import {
   View,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { formatCurrency } from "@/lib/format";
 import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
 import { CartLineItem } from "@/types/cart";
+import ImageContainer from "@/components/image-container";
 import PriceUpdateAlert from "./price-update-alert";
 import RemoveFromCart from "./remove-from-cart";
 import SizeSelector from "./size-selector";
 import UpdateQuantity from "./update-quantity";
 import { cartItemToWishlistItem } from "@/lib/wishlist-item";
 import WishlistButton from "../comps/wishlist-button";
-import { Image } from "expo-image";
 
 const CartTable = () => {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const userId = useAuthStore((s) => s.user?._id ?? null);
 
   const cartItems = useCartStore((s) =>
@@ -71,7 +73,11 @@ const CartTable = () => {
     <View style={styles.root}>
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: Math.max(insets.bottom, 12) + 32 },
+        ]}
+        showsVerticalScrollIndicator={false}
       >
         {itemsWithUpdates.length > 0 ? (
           <View style={styles.alerts}>
@@ -88,6 +94,7 @@ const CartTable = () => {
         <View style={styles.header}>
           <Text style={styles.eyebrow}>Your Selection</Text>
           <Text style={styles.headerTitle}>Cart</Text>
+          <View style={styles.divider} />
           <Text style={styles.headerCount}>
             {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
           </Text>
@@ -100,18 +107,16 @@ const CartTable = () => {
               data.priceChanged && !dismissedAlerts.has(alertKey);
 
             return (
-              <View
-                key={`${alertKey}-${index}`}
-                style={styles.itemCard}
-              >
+              <View key={`${alertKey}-${index}`} style={styles.itemCard}>
                 <Pressable
                   onPress={() => router.push(`/product/${data.handle}` as never)}
                   style={styles.imageWrapper}
                 >
-                  <Image
-                    source={{ uri: data.featured_image }}
-                    style={styles.image}
-                    resizeMode="cover"
+                  <ImageContainer
+                    uri={data.featured_image}
+                    backgroundColor="#F2EFE9"
+                    placeholderText=""
+                    fallbackAspectRatio={2 / 3}
                   />
                 </Pressable>
 
@@ -169,7 +174,9 @@ const CartTable = () => {
                 </View>
 
                 <View style={styles.actions}>
-                  <WishlistButton item={cartItemToWishlistItem(data)} />
+                  <View style={styles.wishlistCircle}>
+                    <WishlistButton item={cartItemToWishlistItem(data)} />
+                  </View>
                   <RemoveFromCart data={data} />
                 </View>
               </View>
@@ -204,12 +211,18 @@ const CartTable = () => {
 
           <Pressable
             onPress={() => router.push("/checkout" as never)}
-            style={styles.checkoutButton}
+            style={({ pressed }) => [
+              styles.checkoutButton,
+              pressed && styles.checkoutPressed,
+            ]}
           >
             <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
           </Pressable>
 
-          <Pressable onPress={() => router.push("/" as never)}>
+          <Pressable
+            onPress={() => router.push("/" as never)}
+            style={styles.continueButton}
+          >
             <Text style={styles.continueText}>Continue Shopping</Text>
           </Pressable>
         </View>
@@ -233,7 +246,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingVertical: 40,
+    paddingTop: 32,
     paddingHorizontal: 16,
     gap: 24,
   },
@@ -254,10 +267,9 @@ const styles = StyleSheet.create({
 
   header: {
     alignItems: "center",
-    gap: 4,
   },
   eyebrow: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "600",
     letterSpacing: 2.6,
     textTransform: "uppercase",
@@ -265,13 +277,21 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 30,
-    fontWeight: "600",
-    color: "#1C1917",
+    fontFamily: "Rexagus",
+    color: "#2B2520",
     lineHeight: 36,
+    marginTop: 4,
+  },
+  divider: {
+    width: 36,
+    height: 2,
+    backgroundColor: "#AE7857",
+    marginTop: 8,
   },
   headerCount: {
     fontSize: 12,
     color: "#A8A29E",
+    marginTop: 10,
   },
 
   list: {
@@ -279,20 +299,20 @@ const styles = StyleSheet.create({
   },
   itemCard: {
     flexDirection: "row",
-    gap: 16,
-    backgroundColor: "#FAF6F1",
-    padding: 16,
+    alignItems: "flex-start",
+    gap: 14,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#F2EFE9",
+    borderRadius: 8,
+    padding: 12,
   },
   imageWrapper: {
-    height: 144,
     width: 96,
     flexShrink: 0,
     overflow: "hidden",
-    backgroundColor: "#F5F5F4",
-  },
-  image: {
-    height: "100%",
-    width: "100%",
+    borderRadius: 4,
+    backgroundColor: "#F2EFE9",
   },
   middle: {
     flex: 1,
@@ -308,20 +328,20 @@ const styles = StyleSheet.create({
   itemTitle: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#292524",
+    color: "#2B2520",
     textTransform: "capitalize",
     lineHeight: 18,
   },
   badge: {
-    backgroundColor: "#DCFCE7",
+    backgroundColor: "#F2EFE9",
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
   },
   badgeText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#15803D",
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#AE7857",
     letterSpacing: 0.4,
   },
   sizeText: {
@@ -336,52 +356,60 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#292524",
+    fontWeight: "700",
+    color: "#2B2520",
   },
   oldPrice: {
     fontSize: 12,
-    color: "#F87171",
+    color: "#9A9187",
     textDecorationLine: "line-through",
   },
   newPrice: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#16A34A",
+    fontWeight: "700",
+    color: "#AE7857",
   },
   stockError: {
     fontSize: 12,
-    color: "#EF4444",
+    fontWeight: "500",
+    color: "#DC2626",
   },
   subtotalText: {
     fontSize: 12,
     color: "#78716C",
   },
   subtotalValue: {
-    fontWeight: "600",
-    color: "#292524",
+    fontWeight: "700",
+    color: "#2B2520",
   },
   actions: {
-    alignItems: "flex-end",
+    alignItems: "center",
     gap: 12,
+  },
+  wishlistCircle: {
+    width: 32,
+    height: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 16,
+    backgroundColor: "#F2EFE9",
   },
 
   summary: {
-    borderWidth: 1,
-    borderColor: "#F5F5F4",
-    padding: 24,
+    backgroundColor: "#F2EFE9",
+    borderRadius: 8,
+    padding: 20,
     gap: 16,
   },
   summaryEyebrow: {
-    fontSize: 12,
-    fontWeight: "600",
+    fontSize: 11,
+    fontWeight: "700",
     letterSpacing: 2.2,
     textTransform: "uppercase",
-    color: "#A8A29E",
+    color: "#78716C",
   },
   summaryRows: {
     gap: 8,
-    paddingTop: 4,
   },
   summaryRow: {
     flexDirection: "row",
@@ -391,56 +419,63 @@ const styles = StyleSheet.create({
   summaryLabel: {
     flex: 1,
     fontSize: 12,
-    color: "#78716C",
+    color: "#57534E",
   },
   summaryValue: {
     marginLeft: 8,
     fontSize: 12,
-    color: "#78716C",
+    color: "#57534E",
   },
   totalRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     borderTopWidth: 1,
-    borderTopColor: "#F5F5F4",
-    paddingTop: 12,
+    borderTopColor: "#E4DED4",
+    paddingTop: 14,
   },
   totalLabel: {
     fontSize: 12,
-    fontWeight: "600",
-    letterSpacing: 1.2,
+    fontWeight: "700",
+    letterSpacing: 1.4,
     textTransform: "uppercase",
-    color: "#57534E",
+    color: "#2B2520",
   },
   totalValue: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1C1917",
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#2B2520",
   },
   shippingNote: {
     fontSize: 12,
     color: "#A8A29E",
   },
   checkoutButton: {
+    height: 48,
+    borderRadius: 4,
     backgroundColor: "#AE7857",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
     alignItems: "center",
+    justifyContent: "center",
+  },
+  checkoutPressed: {
+    opacity: 0.9,
   },
   checkoutButtonText: {
     color: "#FFFFFF",
     fontSize: 12,
     letterSpacing: 1.2,
     textTransform: "uppercase",
-    fontWeight: "600",
+    fontWeight: "700",
+  },
+  continueButton: {
+    alignItems: "center",
+    paddingVertical: 4,
   },
   continueText: {
-    textAlign: "center",
     fontSize: 12,
     letterSpacing: 1.2,
     textTransform: "uppercase",
-    color: "#A8A29E",
+    color: "#78716C",
   },
 });
 

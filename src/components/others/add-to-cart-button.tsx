@@ -10,13 +10,14 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Handbag, X } from "lucide-react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
 import { useAuthStore } from "@/store/auth-store";
 import { CartItem, useCartStore } from "@/store/cart-store";
 import UpdateCart from "./update-cart";
 import { formatCurrency } from "@/lib/format";
-import { Image } from "expo-image";
+import ImageContainer from "@/components/image-container";
 
 export interface AddToCartProduct {
   _id: string;
@@ -46,6 +47,7 @@ const AddToCartButton = ({
   isLogo,
 }: AddToCartButtonProps) => {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const userId = useAuthStore((s) => s.user?._id ?? null);
 
   const cartItems = useCartStore((s) =>
@@ -179,10 +181,11 @@ const AddToCartButton = ({
                       }}
                       style={styles.itemImageWrapper}
                     >
-                      <Image
-                        source={{ uri: data.featured_image }}
-                        style={styles.itemImage}
-                        resizeMode="cover"
+                      <ImageContainer
+                        uri={data.featured_image}
+                        backgroundColor="#F2EFE9"
+                        placeholderText=""
+                        adaptToImage={false}
                       />
                     </Pressable>
 
@@ -195,7 +198,12 @@ const AddToCartButton = ({
                           Size: {data.productSize}
                         </Text>
                         <View style={styles.itemPriceRow}>
-                          <Text style={styles.itemPrice}>
+                          <Text
+                            style={[
+                              styles.itemPrice,
+                              data.comparePrice ? styles.itemPriceSale : null,
+                            ]}
+                          >
                             {formatCurrency(data.price)}
                           </Text>
                           {data.comparePrice ? (
@@ -212,7 +220,12 @@ const AddToCartButton = ({
                 ))}
               </ScrollView>
 
-              <View style={styles.footer}>
+              <View
+                style={[
+                  styles.footer,
+                  { paddingBottom: Math.max(insets.bottom, 12) + 8 },
+                ]}
+              >
                 <View style={styles.subtotalRow}>
                   <Text style={styles.subtotalLabel}>Subtotal</Text>
                   <Text style={styles.subtotalValue}>
@@ -250,7 +263,12 @@ const AddToCartButton = ({
               </View>
             </View>
           ) : (
-            <View style={styles.emptyContainer}>
+            <View
+              style={[
+                styles.emptyContainer,
+                { paddingBottom: Math.max(insets.bottom, 12) + 8 },
+              ]}
+            >
               <Handbag size={40} color="#e7e5e4" strokeWidth={1.5} />
               <View style={styles.emptyTextWrapper}>
                 <Text style={styles.emptyTitle}>Your cart is empty</Text>
@@ -279,13 +297,14 @@ const styles = StyleSheet.create({
 
   errorText: {
     paddingBottom: 8,
-    fontSize: 12,
+    fontSize: 11,
     color: "#DC2626",
   },
   addButton: {
     backgroundColor: "#AE7857",
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    height: 36,
+    borderRadius: 4,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -296,8 +315,10 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: "#FFFFFF",
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "600",
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
   },
 
   modalContainer: {
@@ -355,11 +376,8 @@ const styles = StyleSheet.create({
     height: 96,
     width: 80,
     overflow: "hidden",
-    backgroundColor: "#F5F5F4",
-  },
-  itemImage: {
-    height: "100%",
-    width: "100%",
+    borderRadius: 4,
+    backgroundColor: "#F2EFE9",
   },
   itemDetails: {
     flex: 1,
@@ -368,7 +386,7 @@ const styles = StyleSheet.create({
   itemTitle: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#292524",
+    color: "#2B2520",
     lineHeight: 18,
   },
   itemSize: {
@@ -385,12 +403,15 @@ const styles = StyleSheet.create({
   },
   itemPrice: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#292524",
+    fontWeight: "700",
+    color: "#2B2520",
+  },
+  itemPriceSale: {
+    color: "#AE7857",
   },
   itemComparePrice: {
     fontSize: 12,
-    color: "#A8A29E",
+    color: "#9A9187",
     textDecorationLine: "line-through",
   },
 
@@ -399,7 +420,7 @@ const styles = StyleSheet.create({
     borderTopColor: "#E7E5E4",
     backgroundColor: "#F8F5F1",
     paddingHorizontal: 24,
-    paddingVertical: 20,
+    paddingTop: 20,
   },
   subtotalRow: {
     flexDirection: "row",
@@ -408,47 +429,49 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   subtotalLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "600",
-    letterSpacing: 1.4,
+    letterSpacing: 1.6,
     textTransform: "uppercase",
     color: "#78716C",
   },
   subtotalValue: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#1C1917",
+    fontWeight: "700",
+    color: "#2B2520",
   },
   footerButtons: {
     flexDirection: "column",
     gap: 10,
   },
   checkoutButton: {
+    height: 46,
+    borderRadius: 4,
     backgroundColor: "#AE7857",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
     alignItems: "center",
+    justifyContent: "center",
   },
   checkoutButtonText: {
     color: "#FFFFFF",
     fontSize: 12,
-    letterSpacing: 1.2,
+    letterSpacing: 1,
     textTransform: "uppercase",
-    fontWeight: "600",
+    fontWeight: "700",
   },
   viewCartButton: {
+    height: 46,
+    borderRadius: 4,
     borderWidth: 1,
-    borderColor: "#1C1917",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    borderColor: "#2B2520",
     alignItems: "center",
+    justifyContent: "center",
   },
   viewCartButtonText: {
-    color: "#1C1917",
+    color: "#2B2520",
     fontSize: 12,
-    letterSpacing: 1.2,
+    letterSpacing: 1,
     textTransform: "uppercase",
-    fontWeight: "600",
+    fontWeight: "700",
   },
   continueButton: {
     width: "100%",
@@ -457,7 +480,7 @@ const styles = StyleSheet.create({
   },
   continueButtonText: {
     fontSize: 12,
-    color: "#A8A29E",
+    color: "#78716C",
     letterSpacing: 0.3,
   },
 

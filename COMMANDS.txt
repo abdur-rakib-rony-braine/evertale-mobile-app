@@ -28,7 +28,7 @@ $env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-17.0.20.101-hotspot"
 $env:Path="$env:JAVA_HOME\bin;$env:Path"
 $env:ANDROID_HOME="D:\Android\Sdk"
 $env:ANDROID_SDK_ROOT="D:\Android\Sdk"
-$env:APP_VARIANT="testing"
+$env:APP_VARIANT="production"
 $env:NODE_ENV="production"
 cd D:\code\evertale-mobile\android
 ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a --no-daemon --console=plain "-Dorg.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=768m" "-Dkotlin.daemon.jvm.options=-Xmx1g"

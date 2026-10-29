@@ -1,9 +1,13 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Star } from "lucide-react-native";
+import type { ReactNode } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface SearchFiltersProps {
   activeFilters: Record<string, string>;
   onChange: (type: string, value: string) => void;
+  onApply?: () => void;
+  onClearAll?: () => void;
 }
 
 const PRICE_OPTIONS = [
@@ -21,112 +25,381 @@ const COLORS = [
   { label: "Blush Pink", value: "blush-pink" },
 ];
 const SIZES = ["XS", "S", "M", "L", "XL", "2XL"];
+const FILTER_KEYS = ["price", "type", "color", "size", "rating"];
 
-export default function Filters({ activeFilters, onChange }: SearchFiltersProps) {
-  const renderSection = (title: string, children: React.ReactNode, type: string) => (
+export default function Filters({
+  activeFilters,
+  onChange,
+  onApply,
+  onClearAll,
+}: SearchFiltersProps) {
+  const insets = useSafeAreaInsets();
+
+  const activeCount = FILTER_KEYS.filter((k) => !!activeFilters[k]).length;
+
+  const toggle = (type: string, value: string) => {
+    onChange(type, activeFilters[type] === value ? "" : value);
+  };
+
+  const clearAll = () => {
+    if (onClearAll) {
+      onClearAll();
+      return;
+    }
+    FILTER_KEYS.forEach((k) => {
+      if (activeFilters[k]) onChange(k, "");
+    });
+  };
+
+  const renderSection = (title: string, type: string, children: ReactNode) => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        {activeFilters[type] ? (
+          <Pressable onPress={() => onChange(type, "")} hitSlop={8}>
+            <Text style={styles.resetText}>Reset</Text>
+          </Pressable>
+        ) : null}
+      </View>
       <View style={styles.sectionBody}>{children}</View>
-      <Pressable onPress={() => onChange(type, "")} style={styles.resetBtn}>
-        <Text style={styles.resetText}>Reset {title}</Text>
-      </Pressable>
     </View>
   );
 
-  const renderCheckRow = (label: string, isActive: boolean, onPress: () => void) => (
-    <Pressable style={styles.checkRow} onPress={onPress}>
-      <View style={[styles.checkbox, isActive && styles.checkboxActive]}>
-        {isActive && <View style={styles.checkboxInner} />}
+  const renderRadioRow = (
+    key: string,
+    isActive: boolean,
+    onPress: () => void,
+    content: ReactNode
+  ) => (
+    <Pressable
+      key={key}
+      onPress={onPress}
+      style={[styles.row, isActive && styles.rowActive]}
+    >
+      <View style={[styles.radio, isActive && styles.radioActive]}>
+        {isActive ? <View style={styles.radioDot} /> : null}
       </View>
-      <Text style={[styles.checkLabel, isActive && styles.checkLabelActive]}>{label}</Text>
+      {content}
     </Pressable>
   );
 
   return (
     <View style={styles.container}>
-      {renderSection(
-        "Price",
-        PRICE_OPTIONS.map((opt) =>
-          renderCheckRow(opt.label, activeFilters.price === opt.value, () => onChange("price", opt.value))
-        ),
-        "price"
-      )}
-
-      {renderSection(
-        "Type",
-        TYPES.map((type) =>
-          renderCheckRow(type.label, activeFilters.type === type.value, () => onChange("type", type.value))
-        ),
-        "type"
-      )}
-
-      {renderSection(
-        "Colour",
-        COLORS.map((color) =>
-          renderCheckRow(color.label, activeFilters.color === color.value, () => onChange("color", color.value))
-        ),
-        "color"
-      )}
-
-      {renderSection(
-        "Size",
-        <View style={styles.sizeGrid}>
-          {SIZES.map((size) => {
-            const isActive = activeFilters.size === size;
-            return (
-              <Pressable
-                key={size}
-                style={[styles.sizeBtn, isActive && styles.sizeBtnActive]}
-                onPress={() => onChange("size", size)}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        {renderSection(
+          "Price",
+          "price",
+          PRICE_OPTIONS.map((opt) =>
+            renderRadioRow(
+              opt.value,
+              activeFilters.price === opt.value,
+              () => toggle("price", opt.value),
+              <Text
+                style={[
+                  styles.rowLabel,
+                  activeFilters.price === opt.value && styles.rowLabelActive,
+                ]}
               >
-                <Text style={[styles.sizeText, isActive && styles.sizeTextActive]}>{size}</Text>
-              </Pressable>
-            );
-          })}
-        </View>,
-        "size"
-      )}
+                {opt.label}
+              </Text>
+            )
+          )
+        )}
 
-      {renderSection(
-        "Rating",
-        RATING_OPTIONS.map((rating) => {
-          const isActive = activeFilters.rating === String(rating);
-          return (
-            <Pressable key={rating} style={styles.checkRow} onPress={() => onChange("rating", String(rating))}>
-              <View style={[styles.checkbox, isActive && styles.checkboxActive]}>
-                {isActive && <View style={styles.checkboxInner} />}
-              </View>
+        {renderSection(
+          "Type",
+          "type",
+          TYPES.map((opt) =>
+            renderRadioRow(
+              opt.value,
+              activeFilters.type === opt.value,
+              () => toggle("type", opt.value),
+              <Text
+                style={[
+                  styles.rowLabel,
+                  activeFilters.type === opt.value && styles.rowLabelActive,
+                ]}
+              >
+                {opt.label}
+              </Text>
+            )
+          )
+        )}
+
+        {renderSection(
+          "Colour",
+          "color",
+          COLORS.map((opt) =>
+            renderRadioRow(
+              opt.value,
+              activeFilters.color === opt.value,
+              () => toggle("color", opt.value),
+              <Text
+                style={[
+                  styles.rowLabel,
+                  activeFilters.color === opt.value && styles.rowLabelActive,
+                ]}
+              >
+                {opt.label}
+              </Text>
+            )
+          )
+        )}
+
+        {renderSection(
+          "Size",
+          "size",
+          <View style={styles.sizeGrid}>
+            {SIZES.map((size) => {
+              const isActive = activeFilters.size === size;
+              return (
+                <Pressable
+                  key={size}
+                  style={[styles.sizeBtn, isActive && styles.sizeBtnActive]}
+                  onPress={() => toggle("size", size)}
+                >
+                  <Text
+                    style={[styles.sizeText, isActive && styles.sizeTextActive]}
+                  >
+                    {size}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
+
+        {renderSection(
+          "Rating",
+          "rating",
+          RATING_OPTIONS.map((rating) => {
+            const isActive = activeFilters.rating === String(rating);
+            return renderRadioRow(
+              String(rating),
+              isActive,
+              () => toggle("rating", String(rating)),
               <View style={styles.starsRow}>
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} size={14} color={i < rating ? "#FFC300" : "#E7E5E4"} fill={i < rating ? "#FFC300" : "none"} />
+                  <Star
+                    key={i}
+                    size={15}
+                    color={i < rating ? "#F5B400" : "#E7E5E4"}
+                    fill={i < rating ? "#F5B400" : "none"}
+                  />
                 ))}
               </View>
-            </Pressable>
-          );
-        }),
-        "rating"
-      )}
+            );
+          })
+        )}
+      </ScrollView>
+
+      {onApply ? (
+        <View
+          style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 12) + 8 }]}
+        >
+          <Pressable
+            onPress={clearAll}
+            disabled={activeCount === 0}
+            style={[styles.clearBtn, activeCount === 0 && styles.btnDisabled]}
+          >
+            <Text style={styles.clearText}>Clear all</Text>
+          </Pressable>
+          <Pressable onPress={onApply} style={styles.applyBtn}>
+            <Text style={styles.applyText}>
+              {activeCount > 0 ? `Apply (${activeCount})` : "Apply"}
+            </Text>
+          </Pressable>
+        </View>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, gap: 24 },
-  section: { gap: 12 },
-  sectionTitle: { fontSize: 12, fontWeight: "600", color: "#78716C", textTransform: "uppercase", letterSpacing: 1.5 },
-  sectionBody: { gap: 10 },
-  resetBtn: { paddingTop: 4 },
-  resetText: { fontSize: 11, color: "#A8A29E" },
-  checkRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-  checkbox: { width: 18, height: 18, borderWidth: 1, borderColor: "#D6D3D1", backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center" },
-  checkboxActive: { borderColor: "#AE7857", backgroundColor: "#AE7857" },
-  checkboxInner: { width: 8, height: 8, backgroundColor: "#FFFFFF" },
-  checkLabel: { fontSize: 13, color: "#44403C" },
-  checkLabelActive: { fontWeight: "600", color: "#292524" },
-  sizeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  sizeBtn: { width: 52, height: 36, borderWidth: 1, borderColor: "#E7E5E4", alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF" },
-  sizeBtnActive: { borderColor: "#AE7857", backgroundColor: "#FDF8F5", borderWidth: 2 },
-  sizeText: { fontSize: 12, color: "#78716C" },
-  sizeTextActive: { color: "#AE7857", fontWeight: "600" },
-  starsRow: { flexDirection: "row", gap: 2 },
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: "#F2EFE9",
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#2B2520",
+    letterSpacing: 0.3,
+  },
+  countBadge: {
+    minWidth: 20,
+    height: 20,
+    paddingHorizontal: 6,
+    borderRadius: 10,
+    backgroundColor: "#AE7857",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  countBadgeText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 24,
+  },
+  section: {
+    paddingVertical: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F2EFE9",
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  sectionTitle: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#78716C",
+    textTransform: "uppercase",
+    letterSpacing: 2,
+  },
+  resetText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#AE7857",
+  },
+  sectionBody: {
+    gap: 2,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    marginHorizontal: -10,
+    borderRadius: 6,
+  },
+  rowActive: {
+    backgroundColor: "#FDF8F5",
+  },
+  radio: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: "#D6D3D1",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioActive: {
+    borderColor: "#AE7857",
+  },
+  radioDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#AE7857",
+  },
+  rowLabel: {
+    fontSize: 14,
+    color: "#44403C",
+  },
+  rowLabelActive: {
+    fontWeight: "600",
+    color: "#2B2520",
+  },
+  sizeGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  sizeBtn: {
+    minWidth: 56,
+    height: 40,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: "#E7E5E4",
+    borderRadius: 6,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+  },
+  sizeBtnActive: {
+    borderColor: "#AE7857",
+    backgroundColor: "#AE7857",
+  },
+  sizeText: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#57534E",
+  },
+  sizeTextActive: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+  },
+  starsRow: {
+    flexDirection: "row",
+    gap: 3,
+  },
+  footer: {
+    flexDirection: "row",
+    gap: 12,
+    paddingHorizontal: 20,
+    paddingTop: 14,
+    backgroundColor: "#FFFFFF",
+    borderTopWidth: 1,
+    borderTopColor: "#F2EFE9",
+  },
+  clearBtn: {
+    flex: 1,
+    height: 48,
+    borderWidth: 1,
+    borderColor: "#D6D3D1",
+    borderRadius: 6,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  clearText: {
+    fontSize: 13,
+    fontWeight: "600",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+    color: "#44403C",
+  },
+  btnDisabled: {
+    opacity: 0.4,
+  },
+  applyBtn: {
+    flex: 1.4,
+    height: 48,
+    borderRadius: 6,
+    backgroundColor: "#AE7857",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  applyText: {
+    fontSize: 13,
+    fontWeight: "700",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+    color: "#FFFFFF",
+  },
 });

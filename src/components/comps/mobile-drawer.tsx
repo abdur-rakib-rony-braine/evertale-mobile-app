@@ -1,15 +1,20 @@
 import { useRouter } from "expo-router";
 import {
   Camera,
+  ChevronRight,
   Globe,
   Heart,
   LogOut,
+  Minus,
   Play,
   Plus,
   ShoppingBag,
+  User,
+  Mail,
   X,
 } from "lucide-react-native";
-import { useEffect } from "react";
+import { WithLocalSvg } from "react-native-svg/css";
+import { useEffect, useState } from "react";
 import {
   Dimensions,
   Linking,
@@ -21,12 +26,13 @@ import {
 } from "react-native";
 import Animated, {
   Easing,
+  interpolate,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
-import { Image } from "expo-image";
 
 import { images } from "@/constants/images";
 import { urls } from "@/constants/url";
@@ -35,14 +41,21 @@ import { useCartStore } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
 
 const { width } = Dimensions.get("window");
-const DRAWER_WIDTH = Math.min(width * 0.85, 360);
+const DRAWER_WIDTH = Math.min(width * 0.86, 360);
 
 interface MobileDrawerProps {
   visible: boolean;
   onClose: () => void;
 }
 
-const categories = [
+interface Category {
+  id: number;
+  title: string;
+  link: string;
+  featured?: { id: number; name: string; link: string }[];
+}
+
+const categories: Category[] = [
   {
     id: 1,
     title: "Women's",
@@ -65,12 +78,12 @@ const categories = [
   { id: 4, title: "Best Seller", link: "/best-sellers" },
 ];
 
-const mobileLinks = [
-  { title: "My Account", link: "/account" },
-  { title: "Contact Us", link: "/contact" },
+const accountLinks = [
+  { title: "My Account", link: "/account", Icon: User },
+  { title: "Contact Us", link: "/contact", Icon: Mail },
 ];
 
-const TikTokIcon = ({ size = 16, color = "#A8A29E" }) => (
+const TikTokIcon = ({ size = 16, color = "#78716C" }) => (
   <View
     style={{
       width: size,
@@ -79,18 +92,20 @@ const TikTokIcon = ({ size = 16, color = "#A8A29E" }) => (
       justifyContent: "center",
     }}
   >
-    <Text style={{ color, fontSize: size * 0.7, fontWeight: "700" }}>♪</Text>
+    <Text style={{ color, fontSize: size * 0.9, fontWeight: "700" }}>♪</Text>
   </View>
 );
 
 export default function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const token = useAuthStore((s) => s.token);
   const logout = useAuthStore((s) => s.logout);
   const cartCount = useCartStore((s) => s.totalItems);
   const wishlistCount = useWishlistStore((s) =>
     token ? s.items.length : s.localWishlist.length
   );
+  const [expanded, setExpanded] = useState<number | null>(null);
   const translateX = useSharedValue(-DRAWER_WIDTH);
 
   useEffect(() => {
@@ -98,10 +113,15 @@ export default function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
       duration: 300,
       easing: Easing.inOut(Easing.cubic),
     });
+    if (!visible) setExpanded(null);
   }, [visible]);
 
   const drawerStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
+  }));
+
+  const overlayStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(translateX.value, [-DRAWER_WIDTH, 0], [0, 1]),
   }));
 
   const navigate = (link: string, authRequired?: boolean) => {
@@ -130,6 +150,14 @@ export default function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
     });
   };
 
+  const toggleCategory = (cat: Category) => {
+    if (!cat.featured) {
+      navigate(cat.link);
+      return;
+    }
+    setExpanded((prev) => (prev === cat.id ? null : cat.id));
+  };
+
   const quickLinks = [
     {
       title: "Cart",
@@ -147,131 +175,148 @@ export default function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
     },
   ];
 
+  const socials = [
+    { key: "facebook", url: urls.social.facebook, node: <Globe size={16} color="#78716C" /> },
+    { key: "instagram", url: urls.social.instagram, node: <Camera size={16} color="#78716C" /> },
+    { key: "tiktok", url: urls.social.tiktok, node: <TikTokIcon size={16} /> },
+    { key: "youtube", url: urls.social.youtube, node: <Play size={16} color="#78716C" /> },
+  ];
+
   return (
     <>
-      {visible && (
-        <Pressable
-          onPress={onClose}
-          style={[
-            StyleSheet.absoluteFill,
-            { backgroundColor: "rgba(0,0,0,0.4)", zIndex: 998 },
-          ]}
-        />
-      )}
+      <Animated.View
+        pointerEvents={visible ? "auto" : "none"}
+        style={[StyleSheet.absoluteFill, styles.overlay, overlayStyle]}
+      >
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+      </Animated.View>
 
       <Animated.View style={[styles.drawer, drawerStyle]}>
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
           <Pressable onPress={() => navigate("/")} hitSlop={8}>
-            <Image
-              source={images.logo}
-              style={{ width: 140, height: 42 }}
-              contentFit="contain"
-            />
+            <WithLocalSvg asset={images.logo} width={104} height={34} />
           </Pressable>
-          <Pressable onPress={onClose} hitSlop={10}>
-            <X size={20} color="#78716C" />
+          <Pressable onPress={onClose} hitSlop={10} style={styles.closeButton}>
+            <X size={18} color="#2B2520" />
           </Pressable>
         </View>
 
-        <ScrollView style={styles.scroll}>
-          <View style={styles.body}>
-            {categories.map((cat) => {
-              const isHighlight =
-                cat.title === "New Arrivals" || cat.title === "Best Seller";
+        <ScrollView
+          style={styles.scroll}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          <Text style={styles.sectionHeading}>SHOP</Text>
 
-              return (
+          {categories.map((cat) => {
+            const isHighlight =
+              cat.title === "New Arrivals" || cat.title === "Best Seller";
+            const isOpen = expanded === cat.id;
+
+            return (
+              <View key={cat.id} style={styles.categoryBlock}>
                 <Pressable
-                  key={cat.id}
-                  onPress={() => navigate(cat.link)}
+                  onPress={() => toggleCategory(cat)}
                   style={styles.categoryRow}
                 >
-                  <View style={styles.categoryRowInner}>
-                    <Text
-                      style={[
-                        styles.categoryText,
-                        { color: isHighlight ? "#AE7857" : "#292524" },
-                      ]}
+                  <Text
+                    style={[
+                      styles.categoryText,
+                      isHighlight && styles.categoryTextHighlight,
+                    ]}
+                  >
+                    {cat.title}
+                  </Text>
+                  {cat.featured ? (
+                    isOpen ? (
+                      <Minus size={16} color="#AE7857" />
+                    ) : (
+                      <Plus size={16} color="#A8A29E" />
+                    )
+                  ) : (
+                    <ChevronRight size={16} color={isHighlight ? "#AE7857" : "#A8A29E"} />
+                  )}
+                </Pressable>
+
+                {isOpen && cat.featured ? (
+                  <View style={styles.subList}>
+                    {cat.featured.map((item) => (
+                      <Pressable
+                        key={item.id}
+                        onPress={() => navigate(item.link)}
+                        style={styles.subRow}
+                      >
+                        <Text style={styles.subText}>{item.name}</Text>
+                      </Pressable>
+                    ))}
+                    <Pressable
+                      onPress={() => navigate(cat.link)}
+                      style={styles.subRow}
                     >
-                      {cat.title}
-                    </Text>
-                    {cat.featured && <Plus size={14} color="#A8A29E" />}
+                      <Text style={styles.subTextAll}>Shop All {cat.title}</Text>
+                    </Pressable>
                   </View>
-                </Pressable>
-              );
-            })}
+                ) : null}
+              </View>
+            );
+          })}
 
-            <View style={styles.accountSection}>
-              <Text style={styles.accountHeading}>ACCOUNT</Text>
-
-              {quickLinks.map(({ title, link, Icon, count, authRequired }) => (
-                <Pressable
-                  key={title}
-                  onPress={() => navigate(link, authRequired)}
-                  style={styles.categoryRow}
-                >
-                  <View style={styles.categoryRowInner}>
-                    <View style={styles.quickLeft}>
-                      <Icon size={18} color="#44403C" strokeWidth={1.8} />
-                      <Text style={styles.accountLinkText}>{title}</Text>
+          <View style={styles.quickRow}>
+            {quickLinks.map(({ title, link, Icon, count, authRequired }) => (
+              <Pressable
+                key={title}
+                onPress={() => navigate(link, authRequired)}
+                style={styles.quickCard}
+              >
+                <View>
+                  <Icon size={20} color="#2B2520" strokeWidth={1.6} />
+                  {count > 0 ? (
+                    <View style={styles.countBadge}>
+                      <Text style={styles.countBadgeText}>{count}</Text>
                     </View>
-                    {count > 0 && (
-                      <View style={styles.countBadge}>
-                        <Text style={styles.countBadgeText}>{count}</Text>
-                      </View>
-                    )}
-                  </View>
-                </Pressable>
-              ))}
-
-              {mobileLinks.map((link) => (
-                <Pressable
-                  key={link.title}
-                  onPress={() => navigate(link.link)}
-                  style={styles.categoryRow}
-                >
-                  <Text style={styles.accountLinkText}>{link.title}</Text>
-                </Pressable>
-              ))}
-
-              {token ? (
-                <Pressable onPress={handleLogout} style={styles.categoryRow}>
-                  <View style={styles.logoutInner}>
-                    <LogOut size={16} color="#DC2626" />
-                    <Text style={styles.logoutText}>Logout</Text>
-                  </View>
-                </Pressable>
-              ) : null}
-            </View>
+                  ) : null}
+                </View>
+                <Text style={styles.quickText}>{title}</Text>
+              </Pressable>
+            ))}
           </View>
+
+          <Text style={[styles.sectionHeading, styles.accountHeading]}>
+            ACCOUNT
+          </Text>
+
+          {accountLinks.map(({ title, link, Icon }) => (
+            <Pressable
+              key={title}
+              onPress={() => navigate(link)}
+              style={styles.accountRow}
+            >
+              <Icon size={17} color="#78716C" strokeWidth={1.7} />
+              <Text style={styles.accountText}>{title}</Text>
+            </Pressable>
+          ))}
+
+          {token ? (
+            <Pressable onPress={handleLogout} style={styles.accountRow}>
+              <LogOut size={17} color="#DC2626" strokeWidth={1.7} />
+              <Text style={styles.logoutText}>Logout</Text>
+            </Pressable>
+          ) : null}
         </ScrollView>
 
-        <View style={styles.footer}>
+        <View style={[styles.footer, { paddingBottom: insets.bottom + 18 }]}>
           <Text style={styles.footerHeading}>FOLLOW US</Text>
           <View style={styles.socialRow}>
-            <Pressable
-              onPress={() => openLink(urls.social.facebook)}
-              hitSlop={6}
-            >
-              <Globe size={16} color="#A8A29E" />
-            </Pressable>
-            <Pressable
-              onPress={() => openLink(urls.social.instagram)}
-              hitSlop={6}
-            >
-              <Camera size={16} color="#A8A29E" />
-            </Pressable>
-            <Pressable
-              onPress={() => openLink(urls.social.tiktok)}
-              hitSlop={6}
-            >
-              <TikTokIcon size={16} />
-            </Pressable>
-            <Pressable
-              onPress={() => openLink(urls.social.youtube)}
-              hitSlop={6}
-            >
-              <Play size={16} color="#A8A29E" />
-            </Pressable>
+            {socials.map((s) => (
+              <Pressable
+                key={s.key}
+                onPress={() => openLink(s.url)}
+                hitSlop={6}
+                style={styles.socialButton}
+              >
+                {s.node}
+              </Pressable>
+            ))}
           </View>
         </View>
       </Animated.View>
@@ -280,6 +325,10 @@ export default function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
 }
 
 const styles = StyleSheet.create({
+  overlay: {
+    backgroundColor: "rgba(43,37,32,0.45)",
+    zIndex: 998,
+  },
   drawer: {
     position: "absolute",
     top: 0,
@@ -288,91 +337,146 @@ const styles = StyleSheet.create({
     width: DRAWER_WIDTH,
     backgroundColor: "#FFFFFF",
     zIndex: 999,
+    shadowColor: "#000",
+    shadowOffset: { width: 4, height: 0 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 16,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F4",
+    paddingBottom: 16,
+    backgroundColor: "#F2EFE9",
+  },
+  closeButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
   },
   scroll: {
     flex: 1,
   },
-  body: {
+  scrollContent: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingTop: 22,
+    paddingBottom: 24,
+  },
+  sectionHeading: {
+    fontSize: 10,
+    fontWeight: "600",
+    letterSpacing: 2.5,
+    color: "#A8A29E",
+    marginBottom: 6,
+  },
+  accountHeading: {
+    marginTop: 28,
+  },
+  categoryBlock: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#F2EFE9",
   },
   categoryRow: {
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F4",
-  },
-  categoryRowInner: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    paddingVertical: 15,
   },
-  quickLeft: {
+  categoryText: {
+    fontSize: 17,
+    fontWeight: "500",
+    letterSpacing: 0.2,
+    color: "#2B2520",
+  },
+  categoryTextHighlight: {
+    color: "#AE7857",
+  },
+  subList: {
+    paddingBottom: 10,
+    paddingLeft: 4,
+  },
+  subRow: {
+    paddingVertical: 9,
+    paddingLeft: 12,
+    borderLeftWidth: 2,
+    borderLeftColor: "#E8DDD3",
+  },
+  subText: {
+    fontSize: 14,
+    color: "#57534E",
+  },
+  subTextAll: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#AE7857",
+    letterSpacing: 0.3,
+  },
+  quickRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 24,
+  },
+  quickCard: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    backgroundColor: "#F2EFE9",
+    borderRadius: 4,
   },
-  categoryText: {
-    fontSize: 14,
-    fontWeight: "600",
-    letterSpacing: 0.25,
-  },
-  accountSection: {
-    paddingTop: 20,
-  },
-  accountHeading: {
-    fontSize: 10,
-    fontWeight: "600",
-    letterSpacing: 2,
-    color: "#A8A29E",
-    paddingBottom: 8,
-  },
-  accountLinkText: {
+  quickText: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#44403C",
+    color: "#2B2520",
   },
   countBadge: {
-    height: 20,
-    minWidth: 20,
-    paddingHorizontal: 6,
+    position: "absolute",
+    top: -8,
+    right: -10,
+    height: 17,
+    minWidth: 17,
+    paddingHorizontal: 4,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 999,
     backgroundColor: "#AE7857",
   },
   countBadgeText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "700",
     color: "#FFFFFF",
   },
-  logoutInner: {
+  accountRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 12,
+    paddingVertical: 13,
+  },
+  accountText: {
+    fontSize: 14.5,
+    fontWeight: "500",
+    color: "#44403C",
   },
   logoutText: {
-    fontSize: 14,
+    fontSize: 14.5,
     fontWeight: "500",
     color: "#DC2626",
   },
   footer: {
     paddingHorizontal: 20,
-    paddingVertical: 20,
-    borderTopWidth: 1,
-    borderTopColor: "#F5F5F4",
+    paddingTop: 18,
+    backgroundColor: "#F2EFE9",
   },
   footerHeading: {
     fontSize: 10,
-    letterSpacing: 2,
+    letterSpacing: 2.5,
     color: "#A8A29E",
     marginBottom: 12,
     textAlign: "center",
@@ -380,6 +484,14 @@ const styles = StyleSheet.create({
   socialRow: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: 24,
+    gap: 14,
+  },
+  socialButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

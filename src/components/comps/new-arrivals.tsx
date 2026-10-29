@@ -1,3 +1,5 @@
+import { Product, fetchNewArrivals } from "@/lib/api/products";
+import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   Dimensions,
@@ -7,14 +9,12 @@ import {
   Text,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { Product, fetchNewArrivals } from "@/lib/api/products";
 import ProductCard from "./product-card";
 import QuickViewDialog from "./quick-view-dialog";
 
 const { width } = Dimensions.get("window");
 const HORIZONTAL_PADDING = 16;
-const CARD_GAP = 12;
+const CARD_GAP = 4;
 const CARD_WIDTH = (width - HORIZONTAL_PADDING * 2 - CARD_GAP) / 2;
 
 export default function NewArrivals() {

@@ -99,21 +99,25 @@ const UpdateCart = ({ data, onUpdate }: UpdateCartProps) => {
   return (
     <View style={styles.container}>
       <View>
-        <Text style={styles.errorText}>{stockQuantityError}</Text>
+        {stockQuantityError ? (
+          <Text style={styles.errorText}>{stockQuantityError}</Text>
+        ) : null}
 
         <View style={styles.stepper}>
           <Pressable
             onPress={() => handleQuantityChange("decrement")}
             disabled={isDecrementDisabled}
+            hitSlop={4}
             style={[
               styles.stepperButton,
               isDecrementDisabled && styles.stepperButtonDisabled,
             ]}
+            accessibilityLabel="Decrease quantity"
           >
             {isLoading && loadingAction === "decrement" ? (
-              <ActivityIndicator size="small" color="#1c1917" />
+              <ActivityIndicator size="small" color="#AE7857" />
             ) : (
-              <Minus size={14} color="#1c1917" />
+              <Minus size={14} color="#2B2520" strokeWidth={2} />
             )}
           </Pressable>
 
@@ -124,15 +128,17 @@ const UpdateCart = ({ data, onUpdate }: UpdateCartProps) => {
           <Pressable
             onPress={() => handleQuantityChange("increment")}
             disabled={isLoading}
+            hitSlop={4}
             style={[
               styles.stepperButton,
               isLoading && styles.stepperButtonDisabled,
             ]}
+            accessibilityLabel="Increase quantity"
           >
             {isLoading && loadingAction === "increment" ? (
-              <ActivityIndicator size="small" color="#1c1917" />
+              <ActivityIndicator size="small" color="#AE7857" />
             ) : (
-              <Plus size={14} color="#1c1917" />
+              <Plus size={14} color="#2B2520" strokeWidth={2} />
             )}
           </Pressable>
         </View>
@@ -141,13 +147,14 @@ const UpdateCart = ({ data, onUpdate }: UpdateCartProps) => {
       <Pressable
         onPress={handleRemove}
         disabled={isLoading}
+        hitSlop={6}
         style={[styles.removeButton, isLoading && styles.removeButtonDisabled]}
         accessibilityLabel="Remove from cart"
       >
         {isLoading && loadingAction === "remove" ? (
-          <ActivityIndicator size="small" color="#dc2626" />
+          <ActivityIndicator size="small" color="#DC2626" />
         ) : (
-          <Trash2 size={14} color="#1c1917" />
+          <Trash2 size={15} color="#78716C" strokeWidth={1.8} />
         )}
       </Pressable>
     </View>
@@ -157,50 +164,55 @@ const UpdateCart = ({ data, onUpdate }: UpdateCartProps) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-end",
     justifyContent: "space-between",
   },
   errorText: {
-    minHeight: 20,
     paddingBottom: 4,
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: "500",
     color: "#DC2626",
   },
   stepper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#D9D9D9",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E7E5E4",
+    borderRadius: 4,
+    overflow: "hidden",
   },
   stepperButton: {
     height: 32,
-    width: 32,
+    width: 34,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
   },
   stepperButtonDisabled: {
-    opacity: 0.5,
+    opacity: 0.35,
   },
   quantityBox: {
     height: 32,
-    width: 40,
+    minWidth: 36,
     alignItems: "center",
     justifyContent: "center",
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: "#D1D5DB",
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: "#F2EFE9",
+    backgroundColor: "#FAFAF9",
   },
   quantityText: {
-    fontSize: 14,
-    color: "#1C1917",
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#2B2520",
   },
   removeButton: {
     height: 32,
     width: 32,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 999,
+    borderRadius: 16,
+    backgroundColor: "#F2EFE9",
   },
   removeButtonDisabled: {
     opacity: 0.5,

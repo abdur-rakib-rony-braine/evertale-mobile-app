@@ -1,7 +1,36 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Dimensions,
+  Image as RNImage,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useRouter } from "expo-router";
-import { images } from "@/constants/images";
 import { Image } from "expo-image";
+import { images } from "@/constants/images";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const PADDING = 16;
+const GAP = 6;
+const AVAILABLE_WIDTH = SCREEN_WIDTH - PADDING * 2 - GAP;
+const FALLBACK_RATIO = 3 / 4;
+
+const ratioFor = (source: any) => {
+  const resolved = RNImage.resolveAssetSource(source);
+  const w = resolved?.width ?? 0;
+  const h = resolved?.height ?? 0;
+  return w > 0 && h > 0 ? w / h : FALLBACK_RATIO;
+};
+
+const leftRatio = ratioFor(images.pp2);
+const topRatio = ratioFor(images.pp1);
+const bottomRatio = ratioFor(images.pp3);
+
+const rightStackFactor = 1 / topRatio + 1 / bottomRatio;
+const rightWidth =
+  (AVAILABLE_WIDTH / leftRatio - GAP) / (rightStackFactor + 1 / leftRatio);
+const leftWidth = AVAILABLE_WIDTH - rightWidth;
 
 export default function PassionateSection() {
   const router = useRouter();
@@ -19,24 +48,27 @@ export default function PassionateSection() {
       </View>
 
       <View style={styles.grid}>
-        <View style={styles.leftColumn}>
+        <View style={{ width: leftWidth }}>
           <Image
             source={images.pp2}
-            style={styles.mainImage}
-            resizeMode="cover"
+            contentFit="cover"
+            transition={150}
+            style={[styles.image, { aspectRatio: leftRatio }]}
           />
         </View>
 
-        <View style={styles.rightColumn}>
+        <View style={[styles.rightColumn, { width: rightWidth }]}>
           <Image
             source={images.pp1}
-            style={styles.smallImage}
-            resizeMode="cover"
+            contentFit="cover"
+            transition={150}
+            style={[styles.image, { aspectRatio: topRatio }]}
           />
           <Image
             source={images.pp3}
-            style={styles.smallImage}
-            resizeMode="cover"
+            contentFit="cover"
+            transition={150}
+            style={[styles.image, { aspectRatio: bottomRatio }]}
           />
         </View>
       </View>
@@ -55,7 +87,7 @@ export default function PassionateSection() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
+    paddingHorizontal: PADDING,
     paddingVertical: 40,
   },
   header: {
@@ -86,28 +118,16 @@ const styles = StyleSheet.create({
   },
   grid: {
     flexDirection: "row",
-    gap: 6,
-    height: 400,
-  },
-  leftColumn: {
-    flex: 1,
-    height: "100%",
-  },
-  mainImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 4,
-    backgroundColor: "#F5F5F4",
+    gap: GAP,
+    alignItems: "flex-start",
   },
   rightColumn: {
-    flex: 1,
-    gap: 6,
+    gap: GAP,
   },
-  smallImage: {
+  image: {
     width: "100%",
-    flex: 1,
     borderRadius: 4,
-    backgroundColor: "#F5F5F4",
+    backgroundColor: "#F2EFE9",
   },
   footer: {
     alignItems: "center",
@@ -115,7 +135,7 @@ const styles = StyleSheet.create({
   },
   storyBtn: {
     borderWidth: 1,
-    borderColor: "#292524",
+    borderColor: "#2B2520",
     paddingHorizontal: 32,
     paddingVertical: 12,
     borderRadius: 999,
@@ -125,6 +145,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     letterSpacing: 1.5,
     textTransform: "uppercase",
-    color: "#292524",
+    color: "#2B2520",
   },
 });

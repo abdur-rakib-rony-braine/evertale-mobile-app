@@ -2,16 +2,22 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Camera } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Linking,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Dimensions,
+  Linking,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 import { apiClient } from "@/lib/api/client";
-import { Image } from "expo-image";
+import ImageContainer from "@/components/image-container";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const PADDING = 16;
+const GAP = 8;
+const TILE_WIDTH = (SCREEN_WIDTH - PADDING * 2 - GAP) / 2;
 
 interface InstagramData {
   title: string;
@@ -42,6 +48,10 @@ export default function InstagramFollowSection() {
     fetchInstagram();
   }, []);
 
+  const openInstagram = () => {
+    if (data?.buttonUrl) Linking.openURL(data.buttonUrl);
+  };
+
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -65,35 +75,36 @@ export default function InstagramFollowSection() {
           <Text style={styles.instagramGradientText}>Instagram</Text>
           {suffix}
         </Text>
-        {data.description && (
+        {data.description ? (
           <Text style={styles.description}>{data.description}</Text>
-        )}
+        ) : null}
       </View>
 
-      {data.images?.length > 0 && (
+      {data.images?.length > 0 ? (
         <View style={styles.grid}>
           {data.images.map((image, i) => (
             <Pressable
               key={image._id || i}
-              style={styles.imageWrapper}
-              onPress={() => Linking.openURL(data.buttonUrl)}
+              onPress={openInstagram}
+              style={({ pressed }) => [
+                styles.tile,
+                pressed && styles.tilePressed,
+              ]}
             >
-              <Image
-                source={{ uri: image.src }}
-                style={styles.image}
-                resizeMode="cover"
+              <ImageContainer
+                uri={image.src}
+                backgroundColor="#F2EFE9"
+                placeholderText=""
+                fallbackAspectRatio={1}
               />
             </Pressable>
           ))}
         </View>
-      )}
+      ) : null}
 
-      {data.buttonUrl && (
+      {data.buttonUrl ? (
         <View style={styles.footer}>
-          <Pressable
-            onPress={() => Linking.openURL(data.buttonUrl)}
-            style={styles.buttonContainer}
-          >
+          <Pressable onPress={openInstagram} style={styles.buttonContainer}>
             <LinearGradient
               colors={["#FD059A", "#9609F7", "#FF006E"]}
               start={{ x: 0, y: 0 }}
@@ -105,14 +116,14 @@ export default function InstagramFollowSection() {
             </LinearGradient>
           </Pressable>
         </View>
-      )}
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
+    paddingHorizontal: PADDING,
     paddingVertical: 40,
   },
   header: {
@@ -130,7 +141,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontFamily: "Rexagus",
-    color: "#292524",
+    color: "#2B2520",
     marginBottom: 12,
     textAlign: "center",
   },
@@ -147,19 +158,17 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: 8,
+    alignItems: "flex-start",
+    gap: GAP,
   },
-  imageWrapper: {
-    width: "48%",
-    aspectRatio: 1,
+  tile: {
+    width: TILE_WIDTH,
     borderRadius: 4,
     overflow: "hidden",
-    backgroundColor: "#F5F5F4",
+    backgroundColor: "#F2EFE9",
   },
-  image: {
-    width: "100%",
-    height: "100%",
+  tilePressed: {
+    opacity: 0.88,
   },
   footer: {
     alignItems: "center",

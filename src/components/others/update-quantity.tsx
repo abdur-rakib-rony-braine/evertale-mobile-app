@@ -89,16 +89,14 @@ const UpdateQuantity = ({ data, onUpdate }: UpdateQuantityProps) => {
         <Pressable
           onPress={() => handleQuantityChange("decrement")}
           disabled={isDecrementDisabled}
-          style={[
-            styles.stepperButton,
-            styles.decrementButton,
-            isDecrementDisabled && styles.disabled,
-          ]}
+          hitSlop={4}
+          accessibilityLabel="Decrease quantity"
+          style={[styles.stepperButton, isDecrementDisabled && styles.disabled]}
         >
           {isLoading && loadingAction === "decrement" ? (
-            <ActivityIndicator size="small" color="#78716c" />
+            <ActivityIndicator size="small" color="#AE7857" />
           ) : (
-            <Minus size={12} color="#78716c" />
+            <Minus size={13} color="#2B2520" strokeWidth={2} />
           )}
         </Pressable>
 
@@ -109,16 +107,14 @@ const UpdateQuantity = ({ data, onUpdate }: UpdateQuantityProps) => {
         <Pressable
           onPress={() => handleQuantityChange("increment")}
           disabled={isLoading}
-          style={[
-            styles.stepperButton,
-            styles.incrementButton,
-            isLoading && styles.disabled,
-          ]}
+          hitSlop={4}
+          accessibilityLabel="Increase quantity"
+          style={[styles.stepperButton, isLoading && styles.disabled]}
         >
           {isLoading && loadingAction === "increment" ? (
-            <ActivityIndicator size="small" color="#78716c" />
+            <ActivityIndicator size="small" color="#AE7857" />
           ) : (
-            <Plus size={12} color="#78716c" />
+            <Plus size={13} color="#2B2520" strokeWidth={2} />
           )}
         </Pressable>
       </View>
@@ -128,45 +124,44 @@ const UpdateQuantity = ({ data, onUpdate }: UpdateQuantityProps) => {
 
 const styles = StyleSheet.create({
   errorText: {
-    fontSize: 12,
-    color: "#F87171",
+    fontSize: 11,
+    fontWeight: "500",
+    color: "#DC2626",
     marginBottom: 6,
   },
   stepper: {
     flexDirection: "row",
     alignItems: "center",
     alignSelf: "flex-start",
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#E7E5E4",
+    borderRadius: 4,
+    overflow: "hidden",
   },
   stepperButton: {
-    height: 28,
-    width: 28,
+    height: 32,
+    width: 34,
     alignItems: "center",
     justifyContent: "center",
-  },
-  decrementButton: {
-    borderRightWidth: 1,
-    borderRightColor: "#E7E5E4",
-  },
-  incrementButton: {
-    borderLeftWidth: 1,
-    borderLeftColor: "#E7E5E4",
   },
   disabled: {
-    opacity: 0.4,
+    opacity: 0.35,
   },
   quantityBox: {
-    height: 28,
-    minWidth: 32,
-    paddingHorizontal: 8,
+    height: 32,
+    minWidth: 34,
     alignItems: "center",
     justifyContent: "center",
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: "#F2EFE9",
+    backgroundColor: "#FAFAF9",
   },
   quantityText: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "#292524",
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#2B2520",
   },
 });
 

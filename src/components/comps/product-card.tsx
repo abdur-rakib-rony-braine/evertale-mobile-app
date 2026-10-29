@@ -3,6 +3,7 @@ import { Eye } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import AddToCartButton from "@/components/others/add-to-cart-button";
+import ImageContainer from "@/components/image-container";
 import { Product } from "@/lib/api/products";
 import { formatCurrency } from "@/lib/format";
 import { productToWishlistItem } from "@/lib/wishlist-item";
@@ -18,17 +19,16 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
   const router = useRouter();
   const { color } = useLocalSearchParams<{ color?: string }>();
 
-  const [imageError, setImageError] = useState(false);
   const [selectedSize, setSelectedSize] = useState("");
 
   const primaryImage = product?.images?.[0];
   const sizes = product?.sizes || [];
   const compareAtPrice = product?.compareAtPrice || 0;
+  const hasDiscount = compareAtPrice > (product?.price || 0);
 
-  const discountPercent =
-    compareAtPrice > 0
-      ? Math.round(((compareAtPrice - product.price) / compareAtPrice) * 100)
-      : null;
+  const discountPercent = hasDiscount
+    ? Math.round(((compareAtPrice - product.price) / compareAtPrice) * 100)
+    : null;
 
   const isColorHighlighted = (colorName?: string) => {
     if (!color) return false;
@@ -45,25 +45,13 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
     "-" +
     (item?.name ? item.name.toLowerCase().replace(/\s+/g, "-") : "");
 
+  const goToProduct = () => router.push(`/product/${product.handle}` as never);
+
   return (
     <View style={styles.card}>
-      <View style={styles.imageContainer}>
-        <Pressable
-          onPress={() => router.push(`/product/${product.handle}` as never)}
-          style={styles.fill}
-        >
-          {primaryImage && !imageError ? (
-            <Image
-              source={{ uri: primaryImage }}
-              resizeMode="cover"
-              style={styles.image}
-              onError={() => setImageError(true)}
-            />
-          ) : (
-            <View style={styles.imagePlaceholder}>
-              <Text style={styles.imagePlaceholderText}>No image</Text>
-            </View>
-          )}
+      <View style={styles.imageWrap}>
+        <Pressable onPress={goToProduct} style={styles.fill}>
+          <ImageContainer uri={primaryImage} backgroundColor="#F2EFE9" />
         </Pressable>
 
         {discountPercent ? (
@@ -88,7 +76,7 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
         </Pressable>
       </View>
 
-      <View style={styles.infoContainer}>
+      <View style={styles.content}>
         {product?.colors?.length > 0 ? (
           <View style={styles.colorRow}>
             {product.colors.map((item, i) => {
@@ -118,24 +106,21 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
           </View>
         ) : null}
 
-        <Pressable
-          onPress={() => router.push(`/product/${product.handle}` as never)}
-        >
+        {product?.subCategory ? (
+          <Text style={styles.subCategory}>{product.subCategory}</Text>
+        ) : null}
+
+        <Pressable onPress={goToProduct}>
           <Text numberOfLines={2} style={styles.title}>
             {product?.title}
           </Text>
         </Pressable>
 
         <View style={styles.priceRow}>
-          <Text
-            style={[
-              styles.priceText,
-              { color: compareAtPrice > 0 ? "#AE7857" : "#2B2520" },
-            ]}
-          >
+          <Text style={[styles.price, hasDiscount && styles.priceSale]}>
             {formatCurrency(product?.price)}
           </Text>
-          {product?.price !== compareAtPrice && compareAtPrice > 0 ? (
+          {hasDiscount ? (
             <Text style={styles.compareText}>
               {formatCurrency(compareAtPrice)}
             </Text>
@@ -143,26 +128,26 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
         </View>
 
         {sizes.length > 0 ? (
-          <View style={styles.sizesRow}>
+          <View style={styles.sizeGrid}>
             {sizes.map((size, i) => {
-              const isSelected = selectedSize === size.name;
+              const isActive = selectedSize === size.name;
               const isOOS = size.stockQuantity <= 0;
 
               return (
                 <Pressable
                   key={`${size.name}-${i}`}
-                  onPress={() => !isOOS && setSelectedSize(size.name)}
+                  onPress={() => setSelectedSize(isActive ? "" : size.name)}
                   disabled={isOOS}
                   style={[
-                    styles.sizeButton,
-                    isSelected && styles.sizeButtonSelected,
-                    isOOS && styles.sizeButtonOOS,
+                    styles.sizeBtn,
+                    isActive && styles.sizeBtnActive,
+                    isOOS && styles.sizeBtnOOS,
                   ]}
                 >
                   <Text
                     style={[
                       styles.sizeText,
-                      isSelected && styles.sizeTextSelected,
+                      isActive && styles.sizeTextActive,
                       isOOS && styles.sizeTextOOS,
                     ]}
                   >
@@ -202,52 +187,41 @@ export default function ProductCard({ product, onQuickView }: ProductCardProps) 
 const styles = StyleSheet.create({
   fill: {
     width: "100%",
-    height: "100%",
   },
   card: {
     width: "100%",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#F2EFE9",
+    borderRadius: 8,
+    overflow: "hidden",
   },
-  imageContainer: {
-    aspectRatio: 3 / 4,
+  imageWrap: {
     width: "100%",
     overflow: "hidden",
     backgroundColor: "#F2EFE9",
     position: "relative",
   },
-  image: {
-    width: "100%",
-    height: "100%",
-  },
-  imagePlaceholder: {
-    width: "100%",
-    height: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#F5F5F4",
-  },
-  imagePlaceholderText: {
-    fontSize: 12,
-    color: "#A8A29E",
-  },
   discountWrap: {
     position: "absolute",
-    left: 12,
-    top: 12,
+    left: 8,
+    top: 8,
     backgroundColor: "#AE7857",
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 3,
+    borderRadius: 4,
   },
   discountText: {
     color: "#FFFFFF",
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "600",
-    letterSpacing: 1,
+    letterSpacing: 0.8,
     textTransform: "uppercase",
   },
   wishlistWrap: {
     position: "absolute",
-    right: 12,
-    top: 12,
+    right: 8,
+    top: 8,
   },
   wishlistCircle: {
     width: 32,
@@ -264,8 +238,8 @@ const styles = StyleSheet.create({
   },
   quickViewBtn: {
     position: "absolute",
-    bottom: 12,
-    right: 12,
+    bottom: 8,
+    right: 8,
     width: 32,
     height: 32,
     alignItems: "center",
@@ -278,9 +252,9 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-  infoContainer: {
-    marginTop: 12,
-    gap: 8,
+  content: {
+    padding: 10,
+    gap: 6,
   },
   colorRow: {
     flexDirection: "row",
@@ -308,9 +282,17 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  subCategory: {
+    fontSize: 10,
+    fontWeight: "600",
+    letterSpacing: 1.2,
+    color: "#A8A29E",
+    textTransform: "uppercase",
+  },
   title: {
-    fontSize: 13.5,
+    fontSize: 13,
     lineHeight: 18,
+    fontWeight: "500",
     color: "#2B2520",
   },
   priceRow: {
@@ -318,61 +300,72 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-  priceText: {
-    fontSize: 13.5,
-    fontWeight: "600",
+  price: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#2B2520",
+  },
+  priceSale: {
+    color: "#AE7857",
   },
   compareText: {
-    fontSize: 13,
+    fontSize: 12,
     color: "#9A9187",
     textDecorationLine: "line-through",
   },
-  sizesRow: {
+  sizeGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 6,
+    marginTop: 2,
   },
-  sizeButton: {
+  sizeBtn: {
+    minWidth: 34,
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderWidth: 1,
     borderColor: "#E7E5E4",
+    borderRadius: 4,
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
   },
-  sizeButtonSelected: {
-    borderColor: "#1C1917",
-    borderWidth: 2,
+  sizeBtnActive: {
+    borderColor: "#AE7857",
+    backgroundColor: "#AE7857",
   },
-  sizeButtonOOS: {
+  sizeBtnOOS: {
     borderColor: "#F5F5F4",
+    backgroundColor: "#FAFAF9",
   },
   sizeText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "500",
-    color: "#78716C",
+    color: "#57534E",
   },
-  sizeTextSelected: {
-    color: "#1C1917",
+  sizeTextActive: {
+    color: "#FFFFFF",
+    fontWeight: "700",
   },
   sizeTextOOS: {
-    color: "#E7E5E4",
+    color: "#D6D3D1",
     textDecorationLine: "line-through",
   },
   actionWrapper: {
-    marginTop: 2,
+    marginTop: 4,
   },
   oosButton: {
     width: "100%",
     height: 36,
-    borderWidth: 1,
-    borderColor: "#F5F5F4",
+    borderRadius: 4,
+    backgroundColor: "#F5F5F4",
     alignItems: "center",
     justifyContent: "center",
   },
   oosButtonText: {
     color: "#D6D3D1",
-    fontSize: 12,
-    letterSpacing: 1,
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 0.6,
     textTransform: "uppercase",
-    fontWeight: "500",
   },
 });
