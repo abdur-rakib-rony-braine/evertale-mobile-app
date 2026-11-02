@@ -320,6 +320,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#AE7857",
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: 4,
   },
   saveBtnText: {
     color: "#FFF",

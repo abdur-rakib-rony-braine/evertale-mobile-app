@@ -248,6 +248,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 44,
     backgroundColor: "#171717",
+    borderRadius: 4,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
@@ -362,6 +363,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
+    borderRadius: 4,
   },
   submitDisabled: {
     opacity: 0.6,

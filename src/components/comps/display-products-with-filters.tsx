@@ -1,5 +1,5 @@
 import { SlidersHorizontal, X } from "lucide-react-native";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -17,6 +17,7 @@ import {
 } from "react-native-safe-area-context";
 
 import ProductCard from "@/components/comps/product-card";
+import QuickViewDialog from "@/components/comps/quick-view-dialog";
 import { Product } from "@/lib/api/products";
 import DressCategories from "./dress-categories";
 import Filters from "./filters";
@@ -105,6 +106,11 @@ export default function DisplayProductsWithFilters({
   onClearFilters,
 }: DisplayProductsWithFiltersProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+
+  const handleQuickView = useCallback((product: Product) => {
+    setQuickViewProduct(product);
+  }, []);
 
   const filterCount =
     Object.keys(activeFilters).filter((k) => activeFilters[k]).length +
@@ -170,11 +176,17 @@ export default function DisplayProductsWithFilters({
           )}
           renderItem={({ item }) => (
             <View style={{ width: CARD_WIDTH }}>
-              <ProductCard product={item} />
+              <ProductCard product={item} onQuickView={handleQuickView} />
             </View>
           )}
         />
       )}
+
+      <QuickViewDialog
+        visible={Boolean(quickViewProduct)}
+        onClose={() => setQuickViewProduct(null)}
+        product={quickViewProduct}
+      />
 
       <Modal
         visible={isFilterOpen}
@@ -252,7 +264,12 @@ const styles = StyleSheet.create({
   },
   clearBtnText: { color: "#FFFFFF", fontSize: 12, fontWeight: "600" },
   gridContent: { padding: 16, paddingBottom: 40 },
-  gridRow: { justifyContent: "space-between", gap: CARD_GAP, marginBottom: CARD_GAP },
+  gridRow: {
+    justifyContent: "space-between",
+    gap: CARD_GAP,
+    marginBottom: CARD_GAP,
+    alignItems: "flex-start",
+  },
   resultCount: { fontSize: 12, color: "#78716C", marginBottom: 12 },
   modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" },
   modalSheet: { backgroundColor: "#FFFFFF", borderTopLeftRadius: 16, borderTopRightRadius: 16, maxHeight: "90%" },

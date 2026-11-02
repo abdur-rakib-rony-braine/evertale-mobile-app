@@ -360,6 +360,7 @@ const styles = StyleSheet.create({
     height: 44,
     backgroundColor: "#171717",
     alignItems: "center",
+    borderRadius: 4,
     justifyContent: "center",
     flexDirection: "row",
     gap: 8,
@@ -368,6 +369,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 44,
     backgroundColor: "#AE7857",
+    borderRadius: 4,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
@@ -387,6 +389,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 1,
     borderColor: "#E7E5E4",
+    borderRadius: 4,
   },
   viewDetailsText: {
     fontSize: 12,

@@ -99,10 +99,10 @@ export default function ChangePasswordScreen() {
           type: "success",
           text1: "Password changed successfully",
         });
-        
+
         setCurrentPassword("");
         setNewPassword("");
-        
+
         goBackToAccount();
       }
     } catch (error: any) {
@@ -299,6 +299,7 @@ const styles = StyleSheet.create({
   submitBtn: {
     height: 48,
     backgroundColor: "#AE7857",
+    borderRadius: 4,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 12,
