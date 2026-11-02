@@ -169,6 +169,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: 8,
+    borderRadius: 4,
   },
   confirmBtnDisabled: {
     opacity: 0.5,

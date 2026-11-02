@@ -139,6 +139,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
+    borderRadius: 4,
   },
   mapBtnText: {
     color: "#FFFFFF",

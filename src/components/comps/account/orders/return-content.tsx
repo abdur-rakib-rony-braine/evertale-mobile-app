@@ -245,6 +245,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 1,
     borderColor: "#E7E5E4",
+    borderRadius: 4,
   },
   cancelBtnText: {
     fontSize: 12,
@@ -258,6 +259,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#AE7857",
+    borderRadius: 4,
   },
   submitBtnText: {
     fontSize: 12,

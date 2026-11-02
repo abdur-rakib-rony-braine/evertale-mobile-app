@@ -136,7 +136,7 @@ export default function AllOrder({
           <Text style={styles.pageText}>›</Text>
         </Pressable>
       </View>
-    ) : null;
+    ) : undefined;
 
   const empty = (
     <View style={styles.empty}>

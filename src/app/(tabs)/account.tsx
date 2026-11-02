@@ -202,8 +202,8 @@ const styles = StyleSheet.create({
   footerLink: { fontSize: 12, color: "#AE7857", fontWeight: "500" },
 
   tabBar: { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: "#E7E5E4", backgroundColor: "#FAFAF9" },
-  tabBtn: { flex: 1, alignItems: "center", paddingVertical: 12, gap: 4 },
-  tabBtnActive: { borderBottomWidth: 2, borderBottomColor: "#AE7857", backgroundColor: "#FFFFFF" },
+  tabBtn: { flex: 1, alignItems: "center", paddingVertical: 12, gap: 4, borderRadius: 4 },
+  tabBtnActive: { borderBottomWidth: 2, borderBottomColor: "#AE7857", backgroundColor: "#FFFFFF", borderRadius: 4 },
   tabText: { fontSize: 11, color: "#78716C", fontWeight: "500", textTransform: "uppercase" },
   tabTextActive: { color: "#AE7857", fontWeight: "600" },
 });

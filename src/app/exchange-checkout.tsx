@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
   totalRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   totalLabel: { fontSize: 15, fontWeight: "600", color: "#292524" },
   totalValue: { fontSize: 18, fontWeight: "700" },
-  submitBtn: { height: 48, backgroundColor: "#AE7857", alignItems: "center", justifyContent: "center" },
-  disabledBtn: { opacity: 0.5 },
+  submitBtn: { height: 48, borderRadius: 4, backgroundColor: "#AE7857", alignItems: "center", justifyContent: "center" },
+  disabledBtn: { opacity: 0.5, borderRadius: 4 },
   submitBtnText: { color: "#FFFFFF", fontSize: 13, fontWeight: "600" },
 });

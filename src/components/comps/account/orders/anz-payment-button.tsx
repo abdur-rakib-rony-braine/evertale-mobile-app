@@ -402,6 +402,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         gap: 8,
         marginTop: 12,
+        borderRadius: 4,
     },
     payBtnText: {
         color: "#FFFFFF",

@@ -222,6 +222,7 @@ const styles = StyleSheet.create({
   submitBtn: {
     height: 48,
     backgroundColor: "#AE7857",
+    borderRadius: 4,
     alignItems: "center",
     justifyContent: "center",
   },

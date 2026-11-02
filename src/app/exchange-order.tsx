@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontFamily: "Rexagus", color: "#292524", textAlign: "center", marginBottom: 20 },
   categoryContainer: { marginBottom: 20 },
   categoryScroll: { paddingHorizontal: 16, gap: 8 },
-  categoryBtn: { paddingHorizontal: 16, paddingVertical: 8, borderWidth: 1, borderColor: "#E7E5E4", backgroundColor: "#FFFFFF" },
+  categoryBtn: { borderRadius: 4, paddingHorizontal: 16, paddingVertical: 8, borderWidth: 1, borderColor: "#E7E5E4", backgroundColor: "#FFFFFF" },
   categoryBtnActive: { backgroundColor: "#AE7857", borderColor: "#AE7857" },
   categoryText: { fontSize: 12, fontWeight: "600", color: "#78716C" },
   categoryTextActive: { color: "#FFFFFF" },

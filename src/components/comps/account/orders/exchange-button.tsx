@@ -44,6 +44,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#AE7857",
     backgroundColor: "#FFFFFF",
+    borderRadius: 4,
   },
   btnText: {
     fontSize: 12,
