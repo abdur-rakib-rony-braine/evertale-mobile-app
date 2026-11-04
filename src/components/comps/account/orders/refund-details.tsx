@@ -1,7 +1,7 @@
-import { StyleSheet, Text, View } from "react-native";
-import { DollarSign, CreditCard, Calendar, Package } from "lucide-react-native";
 import { formatCurrency } from "@/lib/format";
 import { Image } from "expo-image";
+import { CreditCard, DollarSign, Package } from "lucide-react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 interface RefundDetailsProps {
   refundData: any;
@@ -82,7 +82,7 @@ export default function RefundDetails({ refundData }: RefundDetailsProps) {
                     <Image
                       source={{ uri: product.imageUrl }}
                       style={styles.image}
-                      resizeMode="cover"
+                      contentFit="cover"
                     />
                   )}
                 </View>

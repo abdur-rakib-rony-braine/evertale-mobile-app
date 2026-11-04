@@ -1,14 +1,13 @@
-import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View, Pressable } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ChevronLeft } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import { StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import DisplayProductsWithFilters from "@/components/comps/display-products-with-filters";
+import HeaderBar from "@/components/comps/header-bar";
+import Topbar from "@/components/comps/topbar";
 import { apiClient } from "@/lib/api/client";
 import { Product } from "@/lib/api/products";
-import Topbar from "@/components/comps/topbar";
-import HeaderBar from "@/components/comps/header-bar";
 
 const CATEGORY_CONFIG: Record<string, { label: string; apiValue: string }> = {
   "mini-dress": { label: "Mini Dress", apiValue: "mini" },
@@ -37,7 +36,7 @@ export default function WomensCategoryScreen() {
 
   useEffect(() => {
     if (!config) {
-      router.replace("/womens");
+      router.push("/womens");
       return;
     }
 

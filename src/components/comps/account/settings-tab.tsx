@@ -1,3 +1,5 @@
+import { useRouter } from "expo-router";
+import { ChevronDown, ChevronRight, X } from "lucide-react-native";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -11,14 +13,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { ChevronDown, ChevronRight, X } from "lucide-react-native";
 import Toast from "react-native-toast-message";
 
-import { useAuthStore } from "@/store/auth-store";
-import { apiClient } from "@/lib/api/client";
 import AddressFinder from "@/components/comps/address-finder";
 import DatePicker from "@/components/comps/date-picker";
+import { apiClient } from "@/lib/api/client";
+import { useAuthStore } from "@/store/auth-store";
 
 const AUSTRALIAN_STATES = ["NSW", "VIC", "QLD", "SA", "WA", "TAS", "NT", "ACT"];
 
@@ -84,13 +84,13 @@ export default function SettingsTab() {
         </View>
       </View>
 
-      <TouchableOpacity
+      <Pressable
         style={styles.linkRow}
         onPress={() => router.push("/change-password" as never)}
       >
         <Text style={styles.linkText}>Change Password</Text>
         <ChevronRight size={18} color="#A8A29E" />
-      </TouchableOpacity>
+      </Pressable>
 
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>PERSONAL DETAILS</Text>

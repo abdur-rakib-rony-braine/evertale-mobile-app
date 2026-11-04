@@ -1,15 +1,15 @@
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { AlertCircle, CheckCircle } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    ActivityIndicator,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { AlertCircle, CheckCircle } from "lucide-react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { urls } from "@/constants/url";
 
@@ -36,7 +36,7 @@ export default function VerifyEmailScreen() {
         if (response.ok) {
           setStatus("success");
           setTimeout(() => {
-            router.replace("/account");
+            router.push("/account");
           }, 3000);
         } else {
           setStatus("failed");
@@ -82,7 +82,7 @@ export default function VerifyEmailScreen() {
             </Text>
             <Pressable
               style={styles.button}
-              onPress={() => router.replace("/account")}
+              onPress={() => router.push("/account")}
             >
               <Text style={styles.buttonText}>BACK TO LOGIN</Text>
             </Pressable>

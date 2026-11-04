@@ -1,7 +1,7 @@
-import { StyleSheet, Text, View } from "react-native";
-import { RefreshCw, Truck, Package } from "lucide-react-native";
 import { formatCurrency } from "@/lib/format";
 import { Image } from "expo-image";
+import { Package, RefreshCw, Truck } from "lucide-react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 interface ReturnDetailsProps {
   returnData: any;
@@ -50,7 +50,7 @@ export default function ReturnDetails({ returnData }: ReturnDetailsProps) {
                   <Image
                     source={{ uri: item.product.imageUrl }}
                     style={styles.image}
-                    resizeMode="cover"
+                    contentFit="cover"
                   />
                 )}
               </View>

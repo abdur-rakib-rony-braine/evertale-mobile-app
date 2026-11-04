@@ -1,6 +1,6 @@
-import { StyleSheet, Text, View } from "react-native";
 import { formatCurrency } from "@/lib/format";
 import { Image } from "expo-image";
+import { StyleSheet, Text, View } from "react-native";
 
 interface ProductItemProps {
   item: any;
@@ -19,7 +19,7 @@ export default function ProductItem({ item }: ProductItemProps) {
             <Image
               source={{ uri: item.imageUrl }}
               style={styles.image}
-              resizeMode="cover"
+              contentFit="cover"
             />
           ) : null}
         </View>

@@ -1,33 +1,33 @@
-import { useState, useMemo } from "react";
-import {
-  ActivityIndicator,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { WebView } from "react-native-webview";
-import {
-  CheckCircle,
-  Circle,
-  CreditCard,
-  ShieldCheck,
-  X,
-  Zap,
-} from "lucide-react-native";
-import Toast from "react-native-toast-message";
 import { useRouter } from "expo-router";
+import {
+    CheckCircle,
+    Circle,
+    CreditCard,
+    ShieldCheck,
+    X,
+    Zap,
+} from "lucide-react-native";
+import { useMemo, useState } from "react";
+import {
+    ActivityIndicator,
+    Modal,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
+import { WebView } from "react-native-webview";
 
-import { useCheckoutStore } from "@/store/checkout-store";
+import { urls } from "@/constants/url";
+import { apiClient } from "@/lib/api/client";
+import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
 import { useCheckoutStepStore } from "@/store/checkout-step-store";
+import { useCheckoutStore } from "@/store/checkout-store";
 import { useDiscountStore } from "@/store/discount-store";
-import { useAuthStore } from "@/store/auth-store";
-import { apiClient } from "@/lib/api/client";
-import { urls } from "@/constants/url";
 
 const PAYMENT_METHODS = [
   { id: "card", label: "Credit / Debit Card", description: "Secure encrypted payment via ANZ" },
@@ -134,7 +134,7 @@ export default function PaymentForm() {
       resetSteps();
       clearCart(userId);
 
-      router.replace(`/order-success?orderId=${orderId}` as never);
+      router.push(`/order-success?orderId=${orderId}` as never);
     }
 
     if (url.includes("/mobile-payment/failed")) {
@@ -144,7 +144,7 @@ export default function PaymentForm() {
       setShowWebView(false);
       setPaymentUrl(null);
 
-      router.replace(
+      router.push(
         `/order-failed?reason=${encodeURIComponent(reason)}` as never
       );
     }

@@ -1,9 +1,9 @@
-import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
-import { XCircle, RefreshCw, ArrowLeft } from "lucide-react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import Topbar from "@/components/comps/topbar";
 import HeaderBar from "@/components/comps/header-bar";
+import Topbar from "@/components/comps/topbar";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { ArrowLeft, RefreshCw, XCircle } from "lucide-react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function OrderFailed() {
   const router = useRouter();
@@ -50,7 +50,7 @@ export default function OrderFailed() {
         </View>
 
         <Pressable
-          onPress={() => router.replace("/checkout" as never)}
+          onPress={() => router.push("/checkout" as never)}
           style={styles.primaryBtn}
         >
           <RefreshCw size={16} color="#FFFFFF" />
@@ -58,7 +58,7 @@ export default function OrderFailed() {
         </Pressable>
 
         <Pressable
-          onPress={() => router.replace("/(tabs)/cart" as never)}
+          onPress={() => router.push("/(tabs)/cart" as never)}
           style={styles.secondaryBtn}
         >
           <ArrowLeft size={16} color="#1C1917" />

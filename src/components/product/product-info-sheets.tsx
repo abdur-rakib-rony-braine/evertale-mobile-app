@@ -1,22 +1,22 @@
 import type { Product, ProductSizeChart, SizeChartMeasurement } from "@/lib/api/products";
 import { Image } from "expo-image";
 import {
-  ChevronDown,
-  Info,
-  RefreshCw,
-  Ruler,
-  Truck,
-  X,
+    ChevronDown,
+    Info,
+    RefreshCw,
+    Ruler,
+    Truck,
+    X,
 } from "lucide-react-native";
 import { useState } from "react";
 import {
-  Linking,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    Linking,
+    Modal,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 
 const CONTACT_URL = "/contact";
@@ -364,7 +364,7 @@ const ProductInfoSheets = ({ product }: ProductInfoSheetsProps) => {
                   <Image
                     source={{ uri: image }}
                     style={styles.sizeChartImage}
-                    resizeMode="contain"
+                    contentFit="contain"
                   />
                 </View>
               ))}

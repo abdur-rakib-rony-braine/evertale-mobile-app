@@ -1,16 +1,16 @@
+import { Image } from "expo-image";
+import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
-  Dimensions,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
+    Dimensions,
+    FlatList,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
+    type NativeScrollEvent,
+    type NativeSyntheticEvent,
 } from "react-native";
-import { ChevronLeft, ChevronRight } from "lucide-react-native";
-import { Image } from "expo-image";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const ASPECT = 4 / 5;
@@ -79,7 +79,7 @@ const ReviewImageCarousel = ({
             <Image
               source={{ uri: item }}
               style={styles.image}
-              resizeMode="contain"
+              contentFit="contain"
             />
           </View>
         )}

@@ -1,22 +1,22 @@
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    ActivityIndicator,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams, useRouter } from "expo-router";
 
+import HeaderBar from "@/components/comps/header-bar";
+import Topbar from "@/components/comps/topbar";
 import ProductInfo from "@/components/product/product-info";
 import Reviews from "@/components/product/reviews";
 import { fetchProductByHandle, type Product } from "@/lib/api/products";
-import Topbar from "@/components/comps/topbar";
-import HeaderBar from "@/components/comps/header-bar";
-import NewArrivals from "../comps/new-arrivals";
 import BestSellers from "../comps/best-sellers";
+import NewArrivals from "../comps/new-arrivals";
 
 const ProductScreen = () => {
   const router = useRouter();
@@ -81,7 +81,7 @@ const ProductScreen = () => {
             The product you're looking for doesn't exist.
           </Text>
           <Pressable
-            onPress={() => router.replace("/" as never)}
+            onPress={() => router.push("/" as never)}
             style={styles.backButton}
           >
             <Text style={styles.backButtonText}>Back to Home</Text>

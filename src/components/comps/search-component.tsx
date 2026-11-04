@@ -144,7 +144,7 @@ export default function SearchComponent() {
                         <Image
                           source={{ uri: product.images?.[0] }}
                           style={styles.productImage}
-                          resizeMode="cover"
+                          contentFit="cover"
                         />
                       </View>
                       <View style={styles.productInfo}>
@@ -209,7 +209,7 @@ export default function SearchComponent() {
                     router.push(cat.href as never);
                   }}
                 >
-                  <Image source={cat.image} style={styles.categoryImage} resizeMode="cover" />
+                  <Image source={cat.image} style={styles.categoryImage} contentFit="cover" />
                   <View style={styles.categoryOverlay} />
                   <View style={styles.categoryContent}>
                     <Text style={styles.categoryLabel}>{cat.label}</Text>

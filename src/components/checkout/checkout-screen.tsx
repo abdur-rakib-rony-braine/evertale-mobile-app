@@ -1,30 +1,30 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
 import { useRouter } from "expo-router";
 import { ArrowLeft, ArrowRight } from "lucide-react-native";
+import { useEffect, useMemo, useState } from "react";
+import {
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
 import Toast from "react-native-toast-message";
 
-import CheckoutStepper from "./checkout-stepper";
-import ShippingForm from "./shipping-form";
+import { AuthUser, useAuthStore } from "@/store/auth-store";
+import { useCheckoutStepStore } from "@/store/checkout-step-store";
+import { useCheckoutStore } from "@/store/checkout-store";
+import { SafeAreaView } from "react-native-safe-area-context";
+import HeaderBar from "../comps/header-bar";
+import Topbar from "../comps/topbar";
 import BillingForm from "./billing-form";
-import Shipping from "./shipping";
+import CheckoutStepper from "./checkout-stepper";
 import OrderSummary from "./order-summary";
 import PaymentForm from "./payment-form";
-import { useCheckoutStore } from "@/store/checkout-store";
-import { useCheckoutStepStore } from "@/store/checkout-step-store";
-import { useAuthStore, AuthUser } from "@/store/auth-store";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Topbar from "../comps/topbar";
-import HeaderBar from "../comps/header-bar";
+import Shipping from "./shipping";
+import ShippingForm from "./shipping-form";
 
 const CheckoutScreen = () => {
   const router = useRouter();
@@ -143,7 +143,7 @@ const CheckoutScreen = () => {
           onPress: () => {
             resetCheckout();
             resetSteps();
-            router.replace("/cart" as never);
+            router.push("/cart" as never);
           },
         },
       ]

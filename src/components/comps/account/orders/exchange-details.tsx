@@ -1,7 +1,7 @@
-import { StyleSheet, Text, View } from "react-native";
-import { Repeat, ArrowRightLeft, Truck } from "lucide-react-native";
 import { formatCurrency } from "@/lib/format";
 import { Image } from "expo-image";
+import { ArrowRightLeft, Repeat, Truck } from "lucide-react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 interface ExchangeDetailsProps {
   exchangeData: any;
@@ -53,7 +53,7 @@ export default function ExchangeDetails({ exchangeData }: ExchangeDetailsProps) 
             <View key={`orig-${idx}`} style={styles.itemRow}>
               <View style={styles.imageBox}>
                 {item?.imageUrl && (
-                  <Image source={{ uri: item.imageUrl }} style={styles.image} resizeMode="cover" />
+                  <Image source={{ uri: item.imageUrl }} style={styles.image} contentFit="cover" />
                 )}
               </View>
               <View style={styles.itemDetails}>
@@ -82,7 +82,7 @@ export default function ExchangeDetails({ exchangeData }: ExchangeDetailsProps) 
             <View key={`new-${idx}`} style={styles.itemRow}>
               <View style={styles.imageBox}>
                 {item?.imageUrl && (
-                  <Image source={{ uri: item.imageUrl }} style={styles.image} resizeMode="cover" />
+                  <Image source={{ uri: item.imageUrl }} style={styles.image} contentFit="cover" />
                 )}
               </View>
               <View style={styles.itemDetails}>

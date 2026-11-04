@@ -67,11 +67,13 @@ export default function ForgotPasswordScreen() {
 
           {!isSuccess ? (
             <View style={styles.card}>
-              <View style={styles.iconCircle}>
-                <KeyRound size={28} color="#AE7857" />
+              <View style={styles.header}>
+                <View style={styles.headerIconCircle}>
+                  <KeyRound size={22} color="#AE7857" strokeWidth={1.8} />
+                </View>
+                <Text style={styles.headerTitle}>Reset Password</Text>
               </View>
-              
-              <Text style={styles.title}>Reset Password</Text>
+
               <Text style={styles.subtitle}>
                 Enter your email address and we'll send you a link to reset your password.
               </Text>
@@ -112,12 +114,12 @@ export default function ForgotPasswordScreen() {
               <View style={styles.iconCircle}>
                 <MailCheck size={28} color="#059669" />
               </View>
-              
+
               <Text style={styles.title}>Check Your Email</Text>
               <Text style={styles.subtitle}>
                 We've sent a password reset link to:
               </Text>
-              
+
               <View style={styles.emailBox}>
                 <Text style={styles.emailText}>{email}</Text>
               </View>
@@ -167,6 +169,26 @@ const styles = StyleSheet.create({
   successCard: {
     alignItems: "center",
     textAlign: "center",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 10,
+  },
+  headerIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#FDF8F5",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: 22,
+    fontWeight: "500",
+    color: "#292524",
   },
   iconCircle: {
     width: 56,

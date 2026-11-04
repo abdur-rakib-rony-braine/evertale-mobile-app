@@ -1,11 +1,11 @@
 import { useState } from "react";
 import {
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    Modal,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 
 import { CartLineItem } from "@/types/cart";
@@ -51,7 +51,7 @@ const OutOfStockCartAlert = ({
                 <Image
                   source={{ uri: item.featured_image }}
                   style={styles.itemImage}
-                  resizeMode="cover"
+                  contentFit="cover"
                 />
                 <View style={styles.itemInfo}>
                   <Text style={styles.itemTitle}>{item.title}</Text>

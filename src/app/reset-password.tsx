@@ -1,3 +1,5 @@
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { CheckCircle, Eye, EyeOff, ShieldCheck } from "lucide-react-native";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -12,12 +14,10 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { CheckCircle, Eye, EyeOff, ShieldCheck } from "lucide-react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
 
-import { urls } from "@/constants/url";
-import Topbar from "@/components/comps/topbar";
 import HeaderBar from "@/components/comps/header-bar";
+import Topbar from "@/components/comps/topbar";
+import { urls } from "@/constants/url";
 
 const RULES = [
   { key: "uppercase", label: "One uppercase letter", test: (v: string) => /[A-Z]/.test(v) },
@@ -120,7 +120,7 @@ export default function ResetPasswordScreen() {
       setSuccessMsg("Password reset successful! Redirecting to login...");
 
       setTimeout(() => {
-        router.replace("/account");
+        router.push("/account");
       }, 2000);
     } catch {
       setErrorMsg("Network error. Please try again.");
@@ -272,7 +272,7 @@ export default function ResetPasswordScreen() {
               Remember your password?{" "}
               <Text
                 style={styles.footerLink}
-                onPress={() => router.replace("/account")}
+                onPress={() => router.push("/account")}
               >
                 Sign In
               </Text>

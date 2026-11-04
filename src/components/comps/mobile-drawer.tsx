@@ -1,37 +1,37 @@
 import { useRouter } from "expo-router";
 import {
-  Camera,
-  ChevronRight,
-  Globe,
-  Heart,
-  LogOut,
-  Minus,
-  Play,
-  Plus,
-  ShoppingBag,
-  User,
-  Mail,
-  X,
+    Camera,
+    ChevronRight,
+    Globe,
+    Heart,
+    LogOut,
+    Mail,
+    Minus,
+    Play,
+    Plus,
+    ShoppingBag,
+    User,
+    X,
 } from "lucide-react-native";
-import { WithLocalSvg } from "react-native-svg/css";
 import { useEffect, useState } from "react";
 import {
-  Dimensions,
-  Linking,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    Dimensions,
+    Linking,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 import Animated, {
-  Easing,
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
+    Easing,
+    interpolate,
+    useAnimatedStyle,
+    useSharedValue,
+    withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { WithLocalSvg } from "react-native-svg/css";
 import Toast from "react-native-toast-message";
 
 import { images } from "@/constants/images";
@@ -143,7 +143,7 @@ export default function MobileDrawer({ visible, onClose }: MobileDrawerProps) {
   const handleLogout = async () => {
     onClose();
     await logout();
-    router.replace("/");
+    router.push("/");
     Toast.show({
       type: "success",
       text1: "Logged out",

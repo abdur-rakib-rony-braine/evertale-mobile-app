@@ -80,7 +80,7 @@ export default function ChangePasswordScreen() {
 
     setIsLoading(true);
     try {
-      await apiClient.patch("/api/auth/mobile-password-change", {
+      const res = await apiClient.patch("/api/auth/mobile-password-change", {
         currentPassword,
         newPassword,
       });

@@ -87,7 +87,7 @@ const OrderSummary = () => {
                     <Image
                       source={{ uri: product.featured_image }}
                       style={styles.image}
-                      resizeMode="cover"
+                      contentFit="cover"
                     />
                   ) : (
                     <View style={styles.imagePlaceholder} />

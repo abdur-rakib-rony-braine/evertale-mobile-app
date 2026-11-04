@@ -1,17 +1,17 @@
+import type { ProductReview } from "@/lib/api/products";
+import { Image } from "expo-image";
+import { X } from "lucide-react-native";
 import { useState } from "react";
 import {
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    Modal,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
-import { X } from "lucide-react-native";
-import type { ProductReview } from "@/lib/api/products";
 import ReviewImageCarousel from "./review-image-carousel";
 import StarRating from "./star-rating";
-import { Image } from "expo-image";
 
 interface ReviewImageGridProps {
   review: ProductReview;
@@ -54,7 +54,7 @@ const ReviewImageGrid = ({ review }: ReviewImageGridProps) => {
             <Image
               source={{ uri: item }}
               style={styles.thumbnailImage}
-              resizeMode="cover"
+              contentFit="cover"
             />
           </Pressable>
         ))}
@@ -140,7 +140,7 @@ const ReviewImageGrid = ({ review }: ReviewImageGridProps) => {
                         <Image
                           source={{ uri: item }}
                           style={styles.thumbnailImage}
-                          resizeMode="cover"
+                          contentFit="cover"
                         />
                       </Pressable>
                     ))}

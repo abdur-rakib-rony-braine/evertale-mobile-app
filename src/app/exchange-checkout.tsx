@@ -1,22 +1,22 @@
-import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, ArrowRightLeft, CheckCircle, Circle } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import {
+    ActivityIndicator,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
-import { useExchangeStore } from "@/store/exchange-store";
+import AnzPaymentButton from "@/components/comps/account/orders/anz-payment-button";
 import { apiClient } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/format";
-import AnzPaymentButton from "@/components/comps/account/orders/anz-payment-button";
+import { useExchangeStore } from "@/store/exchange-store";
 import { Image } from "expo-image";
 
 export default function ExchangeCheckoutScreen() {
@@ -94,7 +94,7 @@ export default function ExchangeCheckoutScreen() {
       if (response.data.success) {
         Toast.show({ type: "success", text1: "Exchange Requested Successfully" });
         reset();
-        router.replace("/account");
+        router.push("/account");
       } else {
         throw new Error(response.data.error || "Exchange failed");
       }
@@ -267,7 +267,7 @@ export default function ExchangeCheckoutScreen() {
                 isRefundAble={isRefundAble}
                 onPaymentSuccess={() => {
                   reset();
-                  router.replace("/account");
+                  router.push("/account");
                 }}
                 onClose={() => {}}
               />

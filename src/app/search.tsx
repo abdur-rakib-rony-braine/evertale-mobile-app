@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams } from "expo-router";
 
 import DisplayProductsWithFilters from "@/components/comps/display-products-with-filters";
@@ -15,6 +16,7 @@ const DRESS_CATEGORIES = [
 ];
 
 export default function SearchScreen() {
+    const insets = useSafeAreaInsets();
     const { q } = useLocalSearchParams();
     const query = (q as string) || "";
 
@@ -68,7 +70,14 @@ export default function SearchScreen() {
     };
 
     return (
-        <SafeAreaView edges={["top", "bottom"]} style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
+        <View
+            style={{
+                flex: 1,
+                backgroundColor: "#FFFFFF",
+                paddingTop: insets.top,
+                paddingBottom: insets.bottom,
+            }}
+        >
             <Topbar />
             <HeaderBar />
             <DisplayProductsWithFilters
@@ -84,6 +93,6 @@ export default function SearchScreen() {
                 onFilterChange={handleFilterChange}
                 onClearFilters={handleClearFilters}
             />
-        </SafeAreaView>
+        </View>
     );
 }

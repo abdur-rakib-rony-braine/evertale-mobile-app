@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Check } from "lucide-react-native";
 import { Image } from "expo-image";
+import { Check } from "lucide-react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 interface ItemCardProps {
   product: any;
@@ -61,7 +61,7 @@ export default function ItemCard({ product, selected, onToggle }: ItemCardProps)
 
         {imageUrl && (
           <View style={styles.imageBox}>
-            <Image source={{ uri: imageUrl }} style={styles.image} resizeMode="cover" />
+            <Image source={{ uri: imageUrl }} style={styles.image} contentFit="cover" />
           </View>
         )}
 

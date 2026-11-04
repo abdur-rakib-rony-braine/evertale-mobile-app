@@ -1,9 +1,9 @@
-import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
-import { CheckCircle2, ShoppingBag } from "lucide-react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import Topbar from "@/components/comps/topbar";
 import HeaderBar from "@/components/comps/header-bar";
+import Topbar from "@/components/comps/topbar";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { CheckCircle2, ShoppingBag } from "lucide-react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function OrderSuccess() {
   const router = useRouter();
@@ -40,7 +40,7 @@ export default function OrderSuccess() {
         ) : null}
 
         <Pressable
-          onPress={() => router.replace("/(tabs)" as never)}
+          onPress={() => router.push("/(tabs)" as never)}
           style={styles.primaryBtn}
         >
           <ShoppingBag size={16} color="#FFFFFF" />
