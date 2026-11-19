@@ -218,7 +218,7 @@ export default function AnzPaymentButton({
         if (!hostedTokenizationUrl) return null;
         return {
             html: buildHtml(hostedTokenizationUrl, `Pay $${Number(amount).toFixed(2)}`),
-            baseUrl: "https://evertale.com.au",
+            baseUrl: process.env.EXPO_PUBLIC_API_URL || "https://evertale.com.au",
         };
     }, [hostedTokenizationUrl, amount]);
 

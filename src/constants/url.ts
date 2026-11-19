@@ -19,9 +19,9 @@ export const urls = {
     },
   },
   web: {
-    base: "https://evertale.com.au",
-    privacy: "https://evertale.com.au/privacy-policy",
-    terms: "https://evertale.com.au/terms-conditions",
+    base: process.env.EXPO_PUBLIC_API_URL || "https://evertale.com.au",
+    privacy: `${process.env.EXPO_PUBLIC_API_URL}/privacy-policy`,
+    terms: `${process.env.EXPO_PUBLIC_API_URL}/terms-conditions`,
   },
   social: {
     facebook: "https://www.facebook.com/evertale.com.au",

@@ -8,7 +8,7 @@ import {
 import { FontAwesome5 } from "@expo/vector-icons";
 import type { Product } from "@/lib/api/products";
 
-const SITE_URL = "https://www.evertale.com.au";
+const SITE_URL = process.env.EXPO_PUBLIC_API_URL || "https://evertale.com.au"
 
 interface ProductShareBarProps {
   product: Product;

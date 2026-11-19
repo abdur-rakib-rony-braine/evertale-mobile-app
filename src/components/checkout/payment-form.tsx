@@ -7,7 +7,7 @@ import {
     X,
     Zap,
 } from "lucide-react-native";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
     ActivityIndicator,
     Modal,
@@ -34,6 +34,19 @@ const PAYMENT_METHODS = [
   { id: "afterpay", label: "Afterpay", description: "Pay in 4 interest-free instalments" },
 ];
 
+const getQueryParam = (url: string, key: string) => {
+  const query = url.split("?")[1];
+  if (!query) return null;
+  const pairs = query.split("#")[0].split("&");
+  for (const pair of pairs) {
+    const [k, v] = pair.split("=");
+    if (decodeURIComponent(k) === key) {
+      return v ? decodeURIComponent(v.replace(/\+/g, " ")) : "";
+    }
+  }
+  return null;
+};
+
 export default function PaymentForm() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -56,6 +69,7 @@ export default function PaymentForm() {
   const [showWebView, setShowWebView] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const handledRef = useRef(false);
 
   const finalTotal = useMemo(() => {
     let total = totalAmount;
@@ -75,6 +89,7 @@ export default function PaymentForm() {
     }
 
     setIsLoading(true);
+    handledRef.current = false;
 
     console.log('cool pay', {
         items: cartItems,
@@ -120,12 +135,14 @@ export default function PaymentForm() {
     }
   };
 
-  const handleWebViewNavigation = (navState: any) => {
-    const { url } = navState;
+  const processUrl = (url: string) => {
+    if (!url) return false;
 
     if (url.includes("/mobile-payment/success")) {
-      const urlParams = new URLSearchParams(url.split("?")[1]);
-      const orderId = urlParams.get("orderId");
+      if (handledRef.current) return true;
+      handledRef.current = true;
+
+      const orderId = getQueryParam(url, "orderId") || "";
 
       setShowWebView(false);
       setPaymentUrl(null);
@@ -134,20 +151,32 @@ export default function PaymentForm() {
       resetSteps();
       clearCart(userId);
 
-      router.push(`/order-success?orderId=${orderId}` as never);
+      setTimeout(() => {
+        router.replace(`/order-success?orderId=${encodeURIComponent(orderId)}` as never);
+      }, 400);
+      return true;
     }
 
     if (url.includes("/mobile-payment/failed")) {
-      const urlParams = new URLSearchParams(url.split("?")[1]);
-      const reason = urlParams.get("reason") || "Payment failed or was cancelled";
+      if (handledRef.current) return true;
+      handledRef.current = true;
+
+      const reason = getQueryParam(url, "reason") || "Payment failed or was cancelled";
 
       setShowWebView(false);
       setPaymentUrl(null);
 
-      router.push(
-        `/order-failed?reason=${encodeURIComponent(reason)}` as never
-      );
+      setTimeout(() => {
+        router.replace(`/order-failed?reason=${encodeURIComponent(reason)}` as never);
+      }, 400);
+      return true;
     }
+
+    return false;
+  };
+
+  const handleWebViewNavigation = (navState: any) => {
+    processUrl(navState?.url);
   };
 
   const closeWebView = () => {
@@ -241,6 +270,7 @@ export default function PaymentForm() {
             <WebView
               source={{ uri: paymentUrl }}
               onNavigationStateChange={handleWebViewNavigation}
+              onShouldStartLoadWithRequest={(request) => !processUrl(request.url)}
               style={{ flex: 1 }}
               javaScriptEnabled
               domStorageEnabled

@@ -1,187 +1,254 @@
 import HeaderBar from "@/components/comps/header-bar";
 import Topbar from "@/components/comps/topbar";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft, RefreshCw, XCircle } from "lucide-react-native";
+import { AlertTriangle, CreditCard, ShoppingBag, X } from "lucide-react-native";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+
+const STEPS = [
+  "Your cart items have been saved and will be waiting for you",
+  "You can try again with the same payment method or use a different one",
+  "If you continue to experience issues, please contact customer support",
+];
+
+const safeDecode = (value?: string) => {
+  if (!value) return "";
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+};
 
 export default function OrderFailed() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { reason, sessionId } = useLocalSearchParams<{
+  const { reason } = useLocalSearchParams<{
     reason?: string;
     sessionId?: string;
   }>();
 
+  const reasonText = safeDecode(reason);
+
   return (
-    <SafeAreaView edges={["top"]} style={styles.scroll}>
+    <SafeAreaView edges={["top"]} style={styles.screen}>
       <Topbar />
       <HeaderBar />
       <ScrollView
-        style={styles.scroll}
+        style={styles.screen}
         contentContainerStyle={[
           styles.container,
-          { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 40 },
+          { paddingBottom: insets.bottom + 40 },
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.iconCircle}>
-          <XCircle size={56} color="#DC2626" strokeWidth={1.5} />
-        </View>
-
-        <Text style={styles.title}>Payment Failed</Text>
-        <Text style={styles.subtitle}>
-          We couldn't process your payment. Don't worry — no money was taken from
-          your account.
-        </Text>
-
-        {reason ? (
-          <View style={styles.reasonBox}>
-            <Text style={styles.reasonLabel}>Reason</Text>
-            <Text style={styles.reasonValue}>{decodeURIComponent(reason)}</Text>
+        <View style={styles.card}>
+          <View style={styles.header}>
+            <View style={styles.iconCircle}>
+              <X size={24} color="#DC2626" />
+            </View>
+            <Text style={styles.title}>Payment Declined</Text>
+            <Text style={styles.subtitle}>Your payment could not be processed</Text>
           </View>
-        ) : null}
 
-        <View style={styles.helpBox}>
-          <Text style={styles.helpTitle}>What you can do</Text>
-          <Text style={styles.helpItem}>• Check your card details and try again</Text>
-          <Text style={styles.helpItem}>• Try a different payment method</Text>
-          <Text style={styles.helpItem}>• Contact your bank if the issue persists</Text>
+          <View style={styles.alert}>
+            <AlertTriangle size={16} color="#DC2626" style={styles.alertIcon} />
+            <View style={styles.alertBody}>
+              <Text style={styles.alertTitle}>Payment Failed</Text>
+              <Text style={styles.alertText}>
+                Your transaction was declined. No charges have been made to your
+                account.
+              </Text>
+              {reasonText ? (
+                <Text style={styles.alertReason}>{reasonText}</Text>
+              ) : null}
+            </View>
+          </View>
+
+          <View style={styles.steps}>
+            <Text style={styles.stepsTitle}>What happens next?</Text>
+            {STEPS.map((text, index) => (
+              <View key={index} style={styles.stepRow}>
+                <View style={styles.stepBadge}>
+                  <Text style={styles.stepBadgeText}>{index + 1}</Text>
+                </View>
+                <Text style={styles.stepText}>{text}</Text>
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.footer}>
+            <Pressable
+              onPress={() => router.push("/checkout" as never)}
+              style={styles.outlineBtn}
+            >
+              <CreditCard size={16} color="#1C1917" />
+              <Text style={styles.outlineBtnText}>Try Again</Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => router.push("/(tabs)" as never)}
+              style={styles.primaryBtn}
+            >
+              <ShoppingBag size={16} color="#FFFFFF" />
+              <Text style={styles.primaryBtnText}>Continue Shopping</Text>
+            </Pressable>
+          </View>
         </View>
-
-        <Pressable
-          onPress={() => router.push("/checkout" as never)}
-          style={styles.primaryBtn}
-        >
-          <RefreshCw size={16} color="#FFFFFF" />
-          <Text style={styles.primaryBtnText}>Try Again</Text>
-        </Pressable>
-
-        <Pressable
-          onPress={() => router.push("/(tabs)/cart" as never)}
-          style={styles.secondaryBtn}
-        >
-          <ArrowLeft size={16} color="#1C1917" />
-          <Text style={styles.secondaryBtnText}>Back to Cart</Text>
-        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: {
+  screen: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F9FAFB",
   },
   container: {
-    paddingHorizontal: 24,
+    padding: 16,
+    paddingTop: 32,
+  },
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+    paddingBottom: 24,
+  },
+  header: {
     alignItems: "center",
+    gap: 8,
+    paddingTop: 24,
+    paddingHorizontal: 24,
   },
   iconCircle: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: "#FEF2F2",
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#FEE2E2",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 24,
+    marginBottom: 8,
   },
   title: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#1C1917",
+    color: "#111827",
     textAlign: "center",
-    marginBottom: 12,
   },
   subtitle: {
     fontSize: 14,
-    color: "#78716C",
+    color: "#6B7280",
     textAlign: "center",
-    lineHeight: 22,
-    marginBottom: 24,
   },
-  reasonBox: {
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "#FEE2E2",
-    backgroundColor: "#FEF2F2",
+  alert: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 24,
+    marginHorizontal: 24,
     padding: 16,
-    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#FECACA",
+    borderRadius: 8,
+    backgroundColor: "#FFFFFF",
   },
-  reasonLabel: {
-    fontSize: 11,
-    fontWeight: "600",
-    letterSpacing: 1.5,
-    textTransform: "uppercase",
+  alertIcon: {
+    marginTop: 2,
+  },
+  alertBody: {
+    flex: 1,
+    gap: 4,
+  },
+  alertTitle: {
+    fontSize: 14,
+    fontWeight: "500",
     color: "#DC2626",
-    marginBottom: 4,
   },
-  reasonValue: {
-    fontSize: 13,
-    color: "#7F1D1D",
-    lineHeight: 20,
-  },
-  helpBox: {
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "#F5F5F4",
-    backgroundColor: "#FAFAF9",
-    padding: 16,
-    marginBottom: 32,
-    gap: 8,
-  },
-  helpTitle: {
+  alertText: {
     fontSize: 12,
-    fontWeight: "600",
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-    color: "#57534E",
-    marginBottom: 4,
+    color: "#DC2626",
+    lineHeight: 18,
   },
-  helpItem: {
-    fontSize: 13,
-    color: "#78716C",
+  alertReason: {
+    fontSize: 12,
+    color: "#7F1D1D",
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  steps: {
+    marginTop: 24,
+    marginHorizontal: 24,
+    gap: 12,
+  },
+  stepsTitle: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#111827",
+  },
+  stepRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  stepBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 2,
+  },
+  stepBadgeText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#111827",
+  },
+  stepText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#4B5563",
     lineHeight: 20,
+  },
+  footer: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 24,
+    paddingHorizontal: 24,
+  },
+  outlineBtn: {
+    flex: 1,
+    height: 56,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 6,
+    backgroundColor: "#FFFFFF",
+  },
+  outlineBtnText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#1C1917",
   },
   primaryBtn: {
+    flex: 1,
+    height: 56,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: "#1C1917",
-    borderRadius: 4,
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    width: "100%",
-    maxWidth: 320,
-    marginBottom: 12,
+    backgroundColor: "#AE7857",
   },
   primaryBtnText: {
+    fontSize: 14,
+    fontWeight: "500",
     color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "600",
-    letterSpacing: 1.2,
-    textTransform: "uppercase",
-  },
-  secondaryBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    borderWidth: 1,
-    borderColor: "#1C1917",
-    borderRadius: 4,
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    width: "100%",
-    maxWidth: 320,
-  },
-  secondaryBtnText: {
-    color: "#1C1917",
-    fontSize: 12,
-    fontWeight: "600",
-    letterSpacing: 1.2,
-    textTransform: "uppercase",
   },
 });
